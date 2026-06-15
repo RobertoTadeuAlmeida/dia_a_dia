@@ -14,15 +14,14 @@ class AuthRepository {
   AuthRepository({
     required SupabaseClient supabaseClient,
     required FlutterSecureStorage secureStorage,
-  })  : _supabaseClient = supabaseClient,
-        _secureStorage = secureStorage;
+  }) : _supabaseClient = supabaseClient,
+       _secureStorage = secureStorage;
 
   /// Autentica o usuário com e-mail e senha.
   /// Persiste o token de sessão localmente em caso de sucesso.
   /// Lança [Exception] em caso de falha.
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     try {
-      // TODO: Supabase integration
       final response = await _supabaseClient.auth.signInWithPassword(
         email: email,
         password: password,
@@ -57,6 +56,7 @@ class AuthRepository {
       // TODO: Supabase integration — configurar OAuth com Google provider
       final response = await _supabaseClient.auth.signInWithOAuth(
         OAuthProvider.google,
+        redirectTo: 'io.supabase.flutter://login-callback/',
       );
 
       if (!response) {

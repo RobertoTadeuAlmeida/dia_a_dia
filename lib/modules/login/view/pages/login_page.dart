@@ -1,5 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../models/auth_status.dart';
+import '../../viewmodel/auth_viewmodel.dart';
 import 'widgets/app_logo.dart';
 import 'widgets/login_card.dart';
 
@@ -11,9 +14,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final formKey = GlobalKey<FormState>();
+
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
   bool obscurePassword = true;
 
   @override
@@ -31,6 +35,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = context.watch<AuthViewModel>();
+    final isLoading = authViewModel.status == AuthStatus.loading;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -44,10 +51,13 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 40),
 
               LoginCard(
+                formKey: formKey,
                 emailController: emailController,
                 passwordController: passwordController,
                 obscurePassword: obscurePassword,
                 onTogglePassword: togglePasswordVisibility,
+                isLoading: isLoading,
+                onSignIn: _handleSignIn,
               ),
 
               const SizedBox(height: 28),
@@ -69,6 +79,16 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
+  Future<void> _handleSignIn() async {
+    final authViewModel = context.read<AuthViewModel>();
+    if (formKey.currentState!.validate()) {
+      await authViewModel.signInWithEmailAndPassword(
+        emailController.text,
+        passwordController.text,
+      );
+    }
+  }
 }
 
 class _SignUpText extends StatelessWidget {
@@ -86,8 +106,7 @@ class _SignUpText extends StatelessWidget {
           TextSpan(
             text: 'Criar conta',
             style: const TextStyle(
-              color: Color(0xFF3B4FE8),
-              fontWeight: FontWeight.w600,
+
             ),
             recognizer: TapGestureRecognizer()..onTap = onTap,
           ),
