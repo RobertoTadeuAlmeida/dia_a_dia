@@ -79,10 +79,11 @@ class AuthViewModel extends ChangeNotifier {
       await _repository.signInWithGoogle();
       _setStatus(AuthStatus.authenticated);
     } on Exception catch (e) {
-      if (_getErrorMessage(e) == 'autenticacao_cancelada') {
+      final message = _getErrorMessage(e);
+      if (message == 'autenticacao_cancelada') {
         _setStatus(AuthStatus.unauthenticated);
       } else {
-        _setError(_getErrorMessage(e));
+        _setError(message);
       }
     }
   }

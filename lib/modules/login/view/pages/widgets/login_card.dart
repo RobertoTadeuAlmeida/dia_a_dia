@@ -1,9 +1,12 @@
+import 'package:dia_a_dia/modules/login/view/pages/widgets/or_divider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dia_a_dia/core/theme/app_theme.dart';
 import 'package:dia_a_dia/core/widgets/custom_text_field.dart';
 import 'package:dia_a_dia/modules/login/utils/login_validators.dart';
 import 'package:dia_a_dia/modules/login/view/pages/widgets/sign_in_button.dart';
+
+import 'google_button.dart';
 
 class LoginCard extends StatelessWidget {
   const LoginCard({
@@ -15,6 +18,7 @@ class LoginCard extends StatelessWidget {
     required this.onTogglePassword,
     required this.isLoading,
     required this.onSignIn,
+    required this.onGoogleSignIn,
   });
 
   final GlobalKey<FormState> formKey;
@@ -26,6 +30,7 @@ class LoginCard extends StatelessWidget {
 
   final VoidCallback onTogglePassword;
   final VoidCallback onSignIn;
+  final VoidCallback onGoogleSignIn;
   final bool isLoading;
 
   @override
@@ -90,6 +95,8 @@ class LoginCard extends StatelessWidget {
             const SizedBox(height: 24),
 
             SignInButton(isLoading: isLoading, onPressed: onSignIn),
+            OrDivider(),
+            GoogleButton(isLoading: isLoading, onPressed: onGoogleSignIn),
           ],
         ),
       ),

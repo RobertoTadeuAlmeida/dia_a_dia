@@ -58,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
                 onTogglePassword: togglePasswordVisibility,
                 isLoading: isLoading,
                 onSignIn: _handleSignIn,
+                onGoogleSignIn: _handleGoogleSignIn,
               ),
 
               const SizedBox(height: 28),
@@ -89,6 +90,12 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
+
+  Future<void> _handleGoogleSignIn() async {
+    final authViewModel = context.read<AuthViewModel>();
+
+    await authViewModel.signInWithGoogle();
+  }
 }
 
 class _SignUpText extends StatelessWidget {
@@ -105,9 +112,7 @@ class _SignUpText extends StatelessWidget {
         children: [
           TextSpan(
             text: 'Criar conta',
-            style: const TextStyle(
-
-            ),
+            style: const TextStyle(),
             recognizer: TapGestureRecognizer()..onTap = onTap,
           ),
         ],

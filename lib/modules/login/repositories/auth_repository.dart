@@ -53,7 +53,8 @@ class AuthRepository {
   /// Lança [Exception] com a string 'autenticacao_cancelada' quando o usuário cancela o fluxo.
   Future<void> signInWithGoogle() async {
     try {
-      // TODO: Supabase integration — configurar OAuth com Google provider
+      // TODO: validar criação da sessão após retorno do OAuth.
+      // Em versões futuras usar authStateChanges para capturar login concluído.
       final response = await _supabaseClient.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'io.supabase.flutter://login-callback/',
