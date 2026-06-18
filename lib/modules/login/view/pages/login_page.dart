@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../home/view/home_page.dart';
 import '../../models/auth_status.dart';
 import '../../viewmodel/auth_viewmodel.dart';
 import 'widgets/app_logo.dart';
@@ -27,6 +28,15 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthViewModel>().checkSession();
+    });
+  }
+
   void togglePasswordVisibility() {
     setState(() {
       obscurePassword = !obscurePassword;
@@ -37,6 +47,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final authViewModel = context.watch<AuthViewModel>();
     final isLoading = authViewModel.status == AuthStatus.loading;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleAuthState(authViewModel);
+      _handleError(authViewModel);
+    });
 
     return Scaffold(
       body: SafeArea(
@@ -81,6 +95,17 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void _handleError(AuthViewModel authViewModel) {
+    if (!mounted) return;
+
+    if (authViewModel.errorMessage != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(authViewModel.errorMessage!)));
+    }
+    authViewModel.clearError();
+  }
+
   Future<void> _handleSignIn() async {
     final authViewModel = context.read<AuthViewModel>();
     if (formKey.currentState!.validate()) {
@@ -95,6 +120,16 @@ class _LoginPageState extends State<LoginPage> {
     final authViewModel = context.read<AuthViewModel>();
 
     await authViewModel.signInWithGoogle();
+  }
+
+  void _handleAuthState(AuthViewModel authViewModel) {
+    if (!mounted) return;
+
+    if (authViewModel.status == AuthStatus.authenticated) {
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+    }
   }
 }
 

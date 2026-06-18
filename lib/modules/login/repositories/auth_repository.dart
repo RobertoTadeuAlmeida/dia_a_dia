@@ -6,11 +6,17 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// Responsável por autenticação e persistência de sessão.
 /// Não contém validações de campos nem lógica de estado de tela.
 class AuthRepository {
+  /// Cliente utilizado para comunicação com o Supabase.
   final SupabaseClient _supabaseClient;
+  /// Armazenamento seguro utilizado para persistência local.
   final FlutterSecureStorage _secureStorage;
 
+  /// Chave utilizada para persistir o token
+  /// de autenticação localmente.
   static const _sessionKey = 'auth_session';
 
+  /// Cria uma instância responsável pelas operações
+  /// de autenticação e persistência de sessão.
   AuthRepository({
     required SupabaseClient supabaseClient,
     required FlutterSecureStorage secureStorage,
@@ -26,8 +32,8 @@ class AuthRepository {
         email: email,
         password: password,
       );
-
       final token = response.session?.accessToken;
+
       if (token == null) {
         throw Exception('E-mail ou senha inválidos.');
       }
@@ -37,58 +43,48 @@ class AuthRepository {
       if (e.statusCode == '400' || e.statusCode == '422') {
         throw Exception('E-mail ou senha inválidos.');
       }
-      throw Exception(
-        'Ops! Não foi possível acessar a aplicação. Tente novamente mais tarde.',
-      );
+      throw Exception(_defaultErrorMessage());
     } on SocketException {
       throw Exception('Sem conexão com a internet.');
     } catch (_) {
-      throw Exception(
-        'Ops! Não foi possível acessar a aplicação. Tente novamente mais tarde.',
-      );
+      throw Exception(_defaultErrorMessage());
     }
   }
 
   /// Autentica o usuário via Google OAuth2.
   /// Lança [Exception] com a string 'autenticacao_cancelada' quando o usuário cancela o fluxo.
+  /// TODO(FN0001-GOOGLE):
+  /// Finalizar captura automática da sessão após
+  /// retorno do OAuth.
+  /// Atualmente o fluxo abre o navegador, porém
+  /// o callback ainda não retorna corretamente
+  /// para o aplicativo.
   Future<void> signInWithGoogle() async {
     try {
       // TODO: validar criação da sessão após retorno do OAuth.
       // Em versões futuras usar authStateChanges para capturar login concluído.
       final response = await _supabaseClient.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'io.supabase.flutter://login-callback/',
+        redirectTo: 'io.supabase.flutter://login-callback',
       );
 
       if (!response) {
         throw Exception('autenticacao_cancelada');
       }
-
-      final token = _supabaseClient.auth.currentSession?.accessToken;
-      if (token == null) {
-        throw Exception('autenticacao_cancelada');
-      }
-
-      await _secureStorage.write(key: _sessionKey, value: token);
     } on AuthException {
-      throw Exception(
-        'Ops! Não foi possível acessar a aplicação. Tente novamente mais tarde.',
-      );
+      throw Exception(_defaultErrorMessage());
     } on SocketException {
       throw Exception('Sem conexão com a internet.');
     } catch (e) {
       if (e.toString().contains('autenticacao_cancelada')) rethrow;
-      throw Exception(
-        'Ops! Não foi possível acessar a aplicação. Tente novamente mais tarde.',
-      );
+      throw Exception(_defaultErrorMessage());
     }
   }
 
-  /// Encerra a sessão autenticada e remove dados locais.
-  /// Garante limpeza local mesmo em caso de falha no Supabase.
+  /// Remove a sessão do Supabase e limpa os
+  /// dados persistidos localmente.
   Future<void> signOut() async {
     try {
-      // TODO: Supabase integration
       await _supabaseClient.auth.signOut();
     } catch (_) {
       // Falha no Supabase não impede limpeza local
@@ -97,7 +93,20 @@ class AuthRepository {
     }
   }
 
-  /// Retorna `true` se existir uma sessão válida .
+  /// Verifica se existe um token salvo localmente.
+  ///
+  /// Não garante que a sessão ainda seja válida
+  /// no servidor.
+  ///
+  /// TODO(FUTURO):
+  /// Substituir a validação baseada em SecureStorage
+  /// pela sessão gerenciada pelo próprio Supabase.
+  ///
+  /// Atualmente o método verifica apenas a existência
+  /// de um token persistido localmente. Em versões futuras,
+  /// deve validar diretamente:
+  /// `_supabaseClient.auth.currentSession`,
+  /// garantindo que a sessão não esteja expirada.
   Future<bool> hasValidSession() async {
     final token = await _secureStorage.read(key: _sessionKey);
     return token != null && token.isNotEmpty;
@@ -106,9 +115,20 @@ class AuthRepository {
   /// Restaura a sessão persistida ao iniciar o app.
   /// Deve ser chamado antes de verificar autenticação na inicialização.
   Future<void> restoreSession() async {
-    // TODO: Supabase integration — restaurar sessão via token persistido
-    // ex: await _supabaseClient.auth.setSession(token);
+    // TODO(FUTURO):
+    // Atualmente o Supabase restaura a sessão
+    // automaticamente através do SDK.
+    //
+    // Este método foi mantido para preservar
+    // a abstração do Repository e permitir
+    // implementações futuras.
     final token = await _secureStorage.read(key: _sessionKey);
     if (token == null) return;
+  }
+
+  /// Retorna a mensagem padrão utilizada
+  /// para erros inesperados de autenticação.
+  String _defaultErrorMessage() {
+    return 'Ops! Não foi possível acessar a aplicação. Tente novamente mais tarde.';
   }
 }
