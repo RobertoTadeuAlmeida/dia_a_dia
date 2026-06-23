@@ -74,13 +74,16 @@ void main() {
   });
 
   group('signInWithGoogle', () {
-    test('deve autenticar com sucesso', () async {
-      when(() => repository.signInWithGoogle()).thenAnswer((_) async {});
+    test(
+      'deve definir status authenticated quando repository concluir com sucesso',
+      () async {
+        when(() => repository.signInWithGoogle()).thenAnswer((_) async {});
 
-      await viewModel.signInWithGoogle();
+        await viewModel.signInWithGoogle();
 
-      expect(viewModel.status, AuthStatus.authenticated);
-    });
+        expect(viewModel.status, AuthStatus.authenticated);
+      },
+    );
 
     test('deve ficar unauthenticated quando usuário cancela', () async {
       when(
