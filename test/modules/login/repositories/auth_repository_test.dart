@@ -39,10 +39,10 @@ void main() {
   late MockFlutterSecureStorage mockSecureStorage;
   late MockAuthResponse mockResponse;
 
-  final name = 'João';
-  final email = 'test@email.com';
-  final password = 'password123';
-  final lastName = 'Silva';
+  const name = 'João';
+  const email = 'test@email.com';
+  const password = 'password123';
+  const lastName = 'Silva';
 
   setUp(() {
     mockSupabaseClient = MockSupabaseClient();
@@ -114,6 +114,25 @@ void main() {
             (e) => e.toString().contains('Sem conexão com a internet.'),
           ),
         ),
+      );
+    });
+
+    test('deve lançar erro generico quando ocorrer falha inesperada', () async {
+      when(
+        () => mockGoTrue.signUp(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+          data: any(named: 'data'),
+        ),
+      ).thenThrow(Exception('Server error'));
+      await expectLater(
+        repository.signUpWithEmailAndPassword(
+          name: name,
+          lastName: lastName,
+          email: email,
+          password: password,
+        ),
+        throwsA(predicate<Exception>((e) => e.toString().contains('Ops! Não foi possível concluir o cadastro. Tente novamente mais tarde.'))),
       );
     });
 

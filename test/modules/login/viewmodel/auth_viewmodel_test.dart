@@ -31,6 +31,7 @@ void main() {
     viewModel.dispose();
   });
 
+
   // ---------------------------------------------------------------------------
   // RESPONSABILIDADE: Gestão de Sessão
   // Funcionalidade: checkSession
