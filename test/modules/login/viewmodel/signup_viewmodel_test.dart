@@ -12,12 +12,6 @@ void main() {
   late SignUpViewModel viewModel;
   late MockAuthRepository repository;
 
-  const name = 'João';
-  const lastName = 'Silva';
-  const email = 'test@email.com';
-  const password = '12345678';
-  const confirmPassword = '12345678';
-
   setUp(() {
     repository = MockAuthRepository();
     viewModel = SignUpViewModel(repository: repository);
@@ -35,11 +29,7 @@ void main() {
     test(
       'deve retornar erro quando nome for vazio e impedir envio do formulario',
       () {
-        viewModel.name = '';
-        viewModel.lastName = lastName;
-        viewModel.email = email;
-        viewModel.password = password;
-        viewModel.confirmPassword = confirmPassword;
+        _preencherFormularioValido(viewModel, name: '');
 
         viewModel.validateForm();
 
@@ -49,11 +39,7 @@ void main() {
     );
 
     test('deve retornar erro quando nome conter apenas espacos', () {
-      viewModel.name = '   ';
-      viewModel.lastName = lastName;
-      viewModel.email = email;
-      viewModel.password = password;
-      viewModel.confirmPassword = confirmPassword;
+      _preencherFormularioValido(viewModel, name: '   ');
 
       viewModel.validateForm();
 
@@ -64,11 +50,7 @@ void main() {
     test(
       'deve remover espacos das extremidades do nome antes da validacao',
       () {
-        viewModel.name = ' João ';
-        viewModel.lastName = lastName;
-        viewModel.email = email;
-        viewModel.password = password;
-        viewModel.confirmPassword = confirmPassword;
+        _preencherFormularioValido(viewModel, name: ' João ');
 
         viewModel.validateForm();
 
@@ -79,11 +61,7 @@ void main() {
     );
 
     test('deve retornar erro quando nome possuir menos de 2 caracteres', () {
-      viewModel.name = 'J';
-      viewModel.lastName = lastName;
-      viewModel.email = email;
-      viewModel.password = password;
-      viewModel.confirmPassword = confirmPassword;
+      _preencherFormularioValido(viewModel, name: 'J');
 
       viewModel.validateForm();
 
@@ -95,11 +73,7 @@ void main() {
     });
 
     test('deve considerar nome valido quando possuir 2 ou mais caracteres', () {
-      viewModel.name = 'Jo';
-      viewModel.lastName = lastName;
-      viewModel.email = email;
-      viewModel.password = password;
-      viewModel.confirmPassword = confirmPassword;
+      _preencherFormularioValido(viewModel, name: 'Jo');
 
       viewModel.validateForm();
 
@@ -107,11 +81,7 @@ void main() {
       expect(viewModel.isFormValid, isTrue);
     });
     test('deve limpar erro de nome quando nome se tornar valido', () {
-      viewModel.name = 'J';
-      viewModel.lastName = lastName;
-      viewModel.email = email;
-      viewModel.password = password;
-      viewModel.confirmPassword = confirmPassword;
+      _preencherFormularioValido(viewModel, name: 'J');
 
       viewModel.validateForm();
 
@@ -143,75 +113,264 @@ void main() {
   });
 
   group('Sobrenome', () {
-    test('deve retornar erro quando sobrenome for vazio', () {});
+    test('deve retornar erro quando sobrenome for vazio', () {
+      _preencherFormularioValido(viewModel, lastName: '');
 
-    test('deve retornar erro quando sobrenome conter apenas espacos', () {});
+      viewModel.validateForm();
 
-    test('deve remover espacos antes de validar sobrenome', () {});
+      expect(viewModel.lastNameError, 'Sobrenome obrigatório.');
+      expect(viewModel.isFormValid, isFalse);
+    });
+
+    test('deve retornar erro quando sobrenome conter apenas espacos', () {
+      _preencherFormularioValido(viewModel, lastName: '   ');
+
+      viewModel.validateForm();
+
+      expect(viewModel.lastNameError, 'Sobrenome obrigatório.');
+      expect(viewModel.isFormValid, isFalse);
+    });
+
+    test('deve remover espacos antes de validar sobrenome', () {
+      _preencherFormularioValido(viewModel, lastName: ' Silva ');
+
+      viewModel.validateForm();
+
+      expect(viewModel.lastName, 'Silva');
+      expect(viewModel.isFormValid, isTrue);
+      expect(viewModel.lastNameError, isNull);
+    });
 
     test(
       'deve retornar erro quando sobrenome possuir menos de 2 caracteres',
-      () {},
+      () {
+        _preencherFormularioValido(viewModel, lastName: 'S');
+
+        viewModel.validateForm();
+
+        expect(
+          viewModel.lastNameError,
+          'O sobrenome deve possuir no mínimo 2 caracteres.',
+        );
+        expect(viewModel.isFormValid, isFalse);
+      },
     );
 
     test(
       'deve considerar sobrenome valido quando possuir 2 ou mais caracteres',
-      () {},
+      () {
+        _preencherFormularioValido(viewModel, lastName: 'Sil');
+
+        viewModel.validateForm();
+
+        expect(viewModel.lastNameError, isNull);
+        expect(viewModel.isFormValid, isTrue);
+      },
     );
-    test(
-      'deve limpar erro de sobrenome quando sobrenome se tornar valido',
-      () {},
-    );
+    test('deve limpar erro de sobrenome quando sobrenome se tornar valido', () {
+      _preencherFormularioValido(viewModel, lastName: 'S');
+
+      viewModel.validateForm();
+
+      expect(
+        viewModel.lastNameError,
+        'O sobrenome deve possuir no mínimo 2 caracteres.',
+      );
+      expect(viewModel.isFormValid, isFalse);
+
+      viewModel.lastName = 'Silva';
+      viewModel.validateForm();
+
+      expect(viewModel.lastNameError, isNull);
+      expect(viewModel.isFormValid, isTrue);
+    });
   });
   group('E-mail', () {
-    test('deve retornar erro quando email for vazio', () {});
+    test('deve retornar erro quando email for vazio', () {
+      _preencherFormularioValido(viewModel, email: '');
 
-    test('deve retornar erro quando email conter apenas espacos', () {});
+      viewModel.validateForm();
 
-    test('deve remover espacos antes de validar email', () {});
+      expect(viewModel.emailError, 'E-mail obrigatório.');
+      expect(viewModel.isFormValid, isFalse);
+    });
 
-    test('deve retornar erro quando email possuir formato invalido', () {});
+    test('deve retornar erro quando email conter apenas espacos', () {
+      _preencherFormularioValido(viewModel, email: '   ');
 
-    test('deve considerar email valido quando formato estiver correto', () {});
+      viewModel.validateForm();
 
-    test('deve limpar erro de email quando email se tornar valido', () {});
+      expect(viewModel.emailError, 'E-mail obrigatório.');
+      expect(viewModel.isFormValid, isFalse);
+    });
+
+    test('deve remover espacos antes de validar email', () {
+      _preencherFormularioValido(viewModel, email: ' test@email.com ');
+
+      viewModel.validateForm();
+
+      expect(viewModel.email, 'test@email.com');
+      expect(viewModel.isFormValid, isTrue);
+      expect(viewModel.emailError, isNull);
+    });
+
+    test('deve retornar erro quando email possuir formato invalido', () {
+      _preencherFormularioValido(viewModel, email: 'test@email');
+
+      viewModel.validateForm();
+
+      expect(viewModel.emailError, 'Formato de e-mail inválido.');
+      expect(viewModel.isFormValid, isFalse);
+    });
+
+    test('deve considerar email valido quando formato estiver correto', () {
+      _preencherFormularioValido(viewModel, email: 'test@email.com');
+
+      viewModel.validateForm();
+
+      expect(viewModel.emailError, isNull);
+      expect(viewModel.isFormValid, isTrue);
+    });
+
+    test('deve limpar erro de email quando email se tornar valido', () {
+      _preencherFormularioValido(viewModel, email: 'test@email');
+
+      viewModel.validateForm();
+
+      expect(viewModel.emailError, 'Formato de e-mail inválido.');
+      expect(viewModel.isFormValid, isFalse);
+
+      viewModel.email = 'test@email.com';
+
+      viewModel.validateForm();
+
+      expect(viewModel.emailError, isNull);
+      expect(viewModel.isFormValid, isTrue);
+    });
   });
 
   group('Senha', () {
-    test('deve retornar erro quando senha for vazia', () {});
+    test('deve retornar erro quando senha for vazia', () {
+      _preencherFormularioValido(viewModel, password: '');
 
-    test(
-      'deve retornar erro quando senha possuir menos de 8 caracteres',
-      () {},
-    );
+      viewModel.validateForm();
+
+      expect(viewModel.passwordError, 'Senha obrigatória.');
+      expect(viewModel.isFormValid, isFalse);
+    });
+
+    test('deve retornar erro quando senha possuir menos de 8 caracteres', () {
+      _preencherFormularioValido(viewModel, password: '1234567');
+
+      viewModel.validateForm();
+
+      expect(
+        viewModel.passwordError,
+        'A senha deve possuir no mínimo 8 caracteres.',
+      );
+      expect(viewModel.isFormValid, isFalse);
+    });
 
     test(
       'deve considerar senha valida quando possuir 8 ou mais caracteres',
-      () {},
+      () {
+        _preencherFormularioValido(viewModel, password: '12345678');
+
+        viewModel.validateForm();
+
+        expect(viewModel.passwordError, isNull);
+        expect(viewModel.isFormValid, isTrue);
+      },
     );
 
-    test('deve limpar erro de senha quando senha se tornar valida', () {});
+    test('deve limpar erro de senha quando senha se tornar valida', () {
+      _preencherFormularioValido(viewModel, password: '1234567');
+
+      viewModel.validateForm();
+
+      expect(
+        viewModel.passwordError,
+        'A senha deve possuir no mínimo 8 caracteres.',
+      );
+      expect(viewModel.isFormValid, isFalse);
+
+      viewModel.password = '12345678';
+      viewModel.validateForm();
+
+      expect(viewModel.passwordError, isNull);
+      expect(viewModel.isFormValid, isTrue);
+    });
   });
 
   group('Confirmação de senha', () {
-    test('deve retornar erro quando confirmacao for vazia', () {});
+    test('deve retornar erro quando confirmacao for vazia', () {
+      _preencherFormularioValido(viewModel, confirmPassword: '');
+
+      viewModel.validateForm();
+
+      expect(
+        viewModel.confirmPasswordError,
+        'Confirmação de senha obrigatória.',
+      );
+      expect(viewModel.isFormValid, isFalse);
+    });
 
     test(
       'deve considerar confirmacao valida quando senha e confirmacao forem iguais',
-      () {},
+      () {
+        _preencherFormularioValido(viewModel, confirmPassword: '12345678');
+
+        viewModel.validateForm();
+
+        expect(viewModel.confirmPasswordError, isNull);
+        expect(viewModel.isFormValid, isTrue);
+      },
     );
 
-    test(
-      'deve retornar erro quando senha e confirmacao forem diferentes',
-      () {},
-    );
-    test('nao deve validar correspondencia enquanto senha for invalida', () {});
+    test('deve retornar erro quando senha e confirmacao forem diferentes', () {
+      _preencherFormularioValido(viewModel, confirmPassword: '87654321');
 
-    test(
-      'nao deve validar correspondencia enquanto confirmacao for invalida',
-      () {},
-    );
+      viewModel.validateForm();
+
+      expect(viewModel.confirmPasswordError, 'As senhas não coincidem.');
+      expect(viewModel.isFormValid, isFalse);
+    });
+    test('nao deve validar correspondencia enquanto senha for invalida', () {
+      _preencherFormularioValido(
+        viewModel,
+        password: '1234567',
+        confirmPassword: '12345678',
+      );
+
+      viewModel.validateForm();
+
+      expect(
+        viewModel.passwordError,
+        'A senha deve possuir no mínimo 8 caracteres.',
+      );
+      expect(viewModel.confirmPasswordError, isNull);
+      expect(viewModel.isFormValid, isFalse);
+    });
+    test('deve limpar erro de confirmacao quando confirmacao se tornar valida',
+        () {
+      _preencherFormularioValido(
+        viewModel,
+        password: '12345678',
+        confirmPassword: '87654321',
+      );
+      viewModel.validateForm();
+      expect(
+        viewModel.confirmPasswordError,
+        'As senhas não coincidem.',
+      );
+      expect(viewModel.isFormValid, isFalse);
+      viewModel.confirmPassword = '12345678';
+      viewModel.validateForm();
+      expect(viewModel.confirmPasswordError, isNull);
+      expect(viewModel.isFormValid, isTrue);
+        });
   });
+
   group('Botão', () {
     test(
       'deve manter o botão desabilitado quando o formulário estiver vazio',
@@ -219,7 +378,6 @@ void main() {
     );
 
     test(
-      //TODO:bool get isFormValid
       'deve considerar formulario invalido quando existir erro em qualquer campo',
       () {},
     );
@@ -299,3 +457,17 @@ void main() {
   });
 }
 
+void _preencherFormularioValido(
+  SignUpViewModel viewModel, {
+  String name = 'João',
+  String lastName = 'Silva',
+  String email = 'test@email.com',
+  String password = '12345678',
+  String confirmPassword = '12345678',
+}) {
+  viewModel.name = name;
+  viewModel.lastName = lastName;
+  viewModel.email = email;
+  viewModel.password = password;
+  viewModel.confirmPassword = confirmPassword;
+}
