@@ -4,470 +4,796 @@ import 'package:dia_a_dia/modules/users/models/user_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+// -----------------------------------------------------------------------------
+// Mocks
+// -----------------------------------------------------------------------------
+
 class MockAuthRepository extends Mock implements AuthRepository {}
 
-class MockUserModel extends Mock implements UserModel {}
+// -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+
+const tName = 'João';
+const tLastName = 'Silva';
+const tEmail = 'test@email.com';
+const tPassword = '12345678';
+const tConfirmPassword = '12345678';
+
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+late SignUpViewModel _viewModel;
+late MockAuthRepository _repository;
+
+void _preencherFormularioValido({
+  String? name,
+  String? lastName,
+  String? email,
+  String? password,
+  String? confirmPassword,
+}) {
+  _viewModel.name = name ?? tName;
+  _viewModel.lastName = lastName ?? tLastName;
+  _viewModel.email = email ?? tEmail;
+  _viewModel.password = password ?? tPassword;
+  _viewModel.confirmPassword = confirmPassword ?? tConfirmPassword;
+}
+
+void _mockSignUpSuccess() {
+  when(
+    () => _repository.signUpWithEmailAndPassword(
+      name: any(named: 'name'),
+      lastName: any(named: 'lastName'),
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+    ),
+  ).thenAnswer((_) async {});
+}
+
+void _mockSignUpFailure(String message) {
+  when(
+    () => _repository.signUpWithEmailAndPassword(
+      name: any(named: 'name'),
+      lastName: any(named: 'lastName'),
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+    ),
+  ).thenThrow(Exception(message));
+}
+
+void _verifySignUpCalled() {
+  verify(
+    () => _repository.signUpWithEmailAndPassword(
+      name: any(named: 'name'),
+      lastName: any(named: 'lastName'),
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+    ),
+  ).called(1);
+}
+
+void _verifySignUpNeverCalled() {
+  verifyNever(
+    () => _repository.signUpWithEmailAndPassword(
+      name: any(named: 'name'),
+      lastName: any(named: 'lastName'),
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+    ),
+  );
+}
 
 void main() {
-  late SignUpViewModel viewModel;
-  late MockAuthRepository repository;
-
   setUp(() {
-    repository = MockAuthRepository();
-    viewModel = SignUpViewModel(repository: repository);
+    _repository = MockAuthRepository();
+    _viewModel = SignUpViewModel(repository: _repository);
   });
 
   tearDown(() {
-    viewModel.dispose();
+    _viewModel.dispose();
   });
 
-  //----------------------------------------------------------------------------
-  // RESPONSABILIDADE: Registro de Novos Usuários
-  // Funcionalidade: signUpWithEmailAndPassword
-  //----------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // RESPONSABILIDADE: Estado Inicial
+  // ---------------------------------------------------------------------------
+  group('Estado Inicial', () {
+    test('deve iniciar sem mensagens de erro nos campos', () {
+      // Assert
+      expect(_viewModel.nameError, isNull);
+      expect(_viewModel.lastNameError, isNull);
+      expect(_viewModel.emailError, isNull);
+      expect(_viewModel.passwordError, isNull);
+      expect(_viewModel.confirmPasswordError, isNull);
+    });
+
+    test('deve iniciar com estado de carregamento desabilitado', () {
+      // Assert
+      expect(_viewModel.isLoading, isFalse);
+    });
+
+    test('deve iniciar com o botão de cadastro desabilitado', () {
+      // Assert
+      expect(_viewModel.isButtonEnabled, isFalse);
+    });
+
+    test('deve iniciar com formulário inválido', () {
+      // Assert
+      expect(_viewModel.isFormValid, isFalse);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // RESPONSABILIDADE: Validação do Campo Nome
+  // ---------------------------------------------------------------------------
   group('Nome', () {
-    test(
-      'deve retornar erro quando nome for vazio e impedir envio do formulario',
-      () {
-        _preencherFormularioValido(viewModel, name: '');
+    test('deve definir erro quando o nome estiver vazio', () {
+      // Arrange
+      _preencherFormularioValido(name: '');
 
-        viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-        expect(viewModel.nameError, 'Nome obrigatório.');
-        expect(viewModel.isFormValid, isFalse);
-      },
-    );
+      // Assert
+      expect(_viewModel.nameError, 'Nome obrigatório.');
+      expect(_viewModel.isFormValid, isFalse);
+    });
 
-    test('deve retornar erro quando nome conter apenas espacos', () {
-      _preencherFormularioValido(viewModel, name: '   ');
+    test('deve definir erro quando o nome contiver apenas espaços', () {
+      // Arrange
+      _preencherFormularioValido(name: '   ');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.nameError, 'Nome obrigatório.');
-      expect(viewModel.isFormValid, isFalse);
+      // Assert
+      expect(_viewModel.nameError, 'Nome obrigatório.');
+      expect(_viewModel.isFormValid, isFalse);
     });
 
     test(
-      'deve remover espacos das extremidades do nome antes da validacao',
+      'deve remover espaços das extremidades do nome antes da validação',
       () {
-        _preencherFormularioValido(viewModel, name: ' João ');
+        // Arrange
+        _preencherFormularioValido(name: ' João ');
 
-        viewModel.validateForm();
+        // Act
+        _viewModel.validateForm();
 
-        expect(viewModel.name, 'João');
-        expect(viewModel.isFormValid, isTrue);
-        expect(viewModel.nameError, isNull);
+        // Assert
+        expect(_viewModel.name, 'João');
+        expect(_viewModel.isFormValid, isTrue);
+        expect(_viewModel.nameError, isNull);
       },
     );
 
-    test('deve retornar erro quando nome possuir menos de 2 caracteres', () {
-      _preencherFormularioValido(viewModel, name: 'J');
+    test('deve definir erro quando o nome possuir menos de 2 caracteres', () {
+      // Arrange
+      _preencherFormularioValido(name: 'J');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
+      // Assert
       expect(
-        viewModel.nameError,
+        _viewModel.nameError,
         'O nome deve possuir no mínimo 2 caracteres.',
       );
-      expect(viewModel.isFormValid, isFalse);
+      expect(_viewModel.isFormValid, isFalse);
     });
 
-    test('deve considerar nome valido quando possuir 2 ou mais caracteres', () {
-      _preencherFormularioValido(viewModel, name: 'Jo');
+    test('deve considerar nome válido quando possuir 2 ou mais caracteres', () {
+      // Arrange
+      _preencherFormularioValido(name: 'Jo');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.nameError, isNull);
-      expect(viewModel.isFormValid, isTrue);
+      // Assert
+      expect(_viewModel.nameError, isNull);
+      expect(_viewModel.isFormValid, isTrue);
     });
-    test('deve limpar erro de nome quando nome se tornar valido', () {
-      _preencherFormularioValido(viewModel, name: 'J');
 
-      viewModel.validateForm();
-
+    test('deve limpar erro de nome quando o valor se tornar válido', () {
+      // Arrange
+      _preencherFormularioValido(name: 'J');
+      _viewModel.validateForm();
       expect(
-        viewModel.nameError,
+        _viewModel.nameError,
         'O nome deve possuir no mínimo 2 caracteres.',
       );
-      expect(viewModel.isFormValid, isFalse);
 
-      viewModel.name = 'João';
-      viewModel.validateForm();
+      // Act
+      _viewModel.name = 'João';
+      _viewModel.validateForm();
 
-      expect(viewModel.nameError, isNull);
-      expect(viewModel.isFormValid, isTrue);
+      // Assert
+      expect(_viewModel.nameError, isNull);
+      expect(_viewModel.isFormValid, isTrue);
     });
-
-    test(
-      'TODO(RF003): deve retornar erro quando o nome nao representar um nome valido',
-      () {
-        // Exemplos:
-        // "123"
-        // "@@@"
-        // "Joao123"
-        // "Maria@"
-        //
-        // Regra ainda nao documentada.
-      },
-    );
   });
 
+  // ---------------------------------------------------------------------------
+  // RESPONSABILIDADE: Validação do Campo Sobrenome
+  // ---------------------------------------------------------------------------
   group('Sobrenome', () {
-    test('deve retornar erro quando sobrenome for vazio', () {
-      _preencherFormularioValido(viewModel, lastName: '');
+    test('deve definir erro quando o sobrenome estiver vazio', () {
+      // Arrange
+      _preencherFormularioValido(lastName: '');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.lastNameError, 'Sobrenome obrigatório.');
-      expect(viewModel.isFormValid, isFalse);
+      // Assert
+      expect(_viewModel.lastNameError, 'Sobrenome obrigatório.');
+      expect(_viewModel.isFormValid, isFalse);
     });
 
-    test('deve retornar erro quando sobrenome conter apenas espacos', () {
-      _preencherFormularioValido(viewModel, lastName: '   ');
+    test('deve definir erro quando o sobrenome contiver apenas espaços', () {
+      // Arrange
+      _preencherFormularioValido(lastName: '   ');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.lastNameError, 'Sobrenome obrigatório.');
-      expect(viewModel.isFormValid, isFalse);
+      // Assert
+      expect(_viewModel.lastNameError, 'Sobrenome obrigatório.');
+      expect(_viewModel.isFormValid, isFalse);
     });
 
-    test('deve remover espacos antes de validar sobrenome', () {
-      _preencherFormularioValido(viewModel, lastName: ' Silva ');
+    test('deve remover espaços antes de validar o sobrenome', () {
+      // Arrange
+      _preencherFormularioValido(lastName: ' Silva ');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.lastName, 'Silva');
-      expect(viewModel.isFormValid, isTrue);
-      expect(viewModel.lastNameError, isNull);
+      // Assert
+      expect(_viewModel.lastName, 'Silva');
+      expect(_viewModel.isFormValid, isTrue);
+      expect(_viewModel.lastNameError, isNull);
     });
 
     test(
-      'deve retornar erro quando sobrenome possuir menos de 2 caracteres',
+      'deve definir erro quando o sobrenome possuir menos de 2 caracteres',
       () {
-        _preencherFormularioValido(viewModel, lastName: 'S');
+        // Arrange
+        _preencherFormularioValido(lastName: 'S');
 
-        viewModel.validateForm();
+        // Act
+        _viewModel.validateForm();
 
+        // Assert
         expect(
-          viewModel.lastNameError,
+          _viewModel.lastNameError,
           'O sobrenome deve possuir no mínimo 2 caracteres.',
         );
-        expect(viewModel.isFormValid, isFalse);
+        expect(_viewModel.isFormValid, isFalse);
       },
     );
 
     test(
-      'deve considerar sobrenome valido quando possuir 2 ou mais caracteres',
+      'deve considerar sobrenome válido quando possuir 2 ou mais caracteres',
       () {
-        _preencherFormularioValido(viewModel, lastName: 'Sil');
+        // Arrange
+        _preencherFormularioValido(lastName: 'Sil');
 
-        viewModel.validateForm();
+        // Act
+        _viewModel.validateForm();
 
-        expect(viewModel.lastNameError, isNull);
-        expect(viewModel.isFormValid, isTrue);
+        // Assert
+        expect(_viewModel.lastNameError, isNull);
+        expect(_viewModel.isFormValid, isTrue);
       },
     );
-    test('deve limpar erro de sobrenome quando sobrenome se tornar valido', () {
-      _preencherFormularioValido(viewModel, lastName: 'S');
 
-      viewModel.validateForm();
-
+    test('deve limpar erro de sobrenome quando o valor se tornar válido', () {
+      // Arrange
+      _preencherFormularioValido(lastName: 'S');
+      _viewModel.validateForm();
       expect(
-        viewModel.lastNameError,
+        _viewModel.lastNameError,
         'O sobrenome deve possuir no mínimo 2 caracteres.',
       );
-      expect(viewModel.isFormValid, isFalse);
 
-      viewModel.lastName = 'Silva';
-      viewModel.validateForm();
+      // Act
+      _viewModel.lastName = 'Silva';
+      _viewModel.validateForm();
 
-      expect(viewModel.lastNameError, isNull);
-      expect(viewModel.isFormValid, isTrue);
+      // Assert
+      expect(_viewModel.lastNameError, isNull);
+      expect(_viewModel.isFormValid, isTrue);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // RESPONSABILIDADE: Validação do Campo E-mail
+  // ---------------------------------------------------------------------------
   group('E-mail', () {
-    test('deve retornar erro quando email for vazio', () {
-      _preencherFormularioValido(viewModel, email: '');
+    test('deve definir erro quando o e-mail estiver vazio', () {
+      // Arrange
+      _preencherFormularioValido(email: '');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.emailError, 'E-mail obrigatório.');
-      expect(viewModel.isFormValid, isFalse);
+      // Assert
+      expect(_viewModel.emailError, 'E-mail obrigatório.');
+      expect(_viewModel.isFormValid, isFalse);
     });
 
-    test('deve retornar erro quando email conter apenas espacos', () {
-      _preencherFormularioValido(viewModel, email: '   ');
+    test('deve definir erro quando o e-mail contiver apenas espaços', () {
+      // Arrange
+      _preencherFormularioValido(email: '   ');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.emailError, 'E-mail obrigatório.');
-      expect(viewModel.isFormValid, isFalse);
+      // Assert
+      expect(_viewModel.emailError, 'E-mail obrigatório.');
+      expect(_viewModel.isFormValid, isFalse);
     });
 
-    test('deve remover espacos antes de validar email', () {
-      _preencherFormularioValido(viewModel, email: ' test@email.com ');
+    test('deve remover espaços antes de validar o e-mail', () {
+      // Arrange
+      _preencherFormularioValido(email: ' test@email.com ');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.email, 'test@email.com');
-      expect(viewModel.isFormValid, isTrue);
-      expect(viewModel.emailError, isNull);
+      // Assert
+      expect(_viewModel.email, 'test@email.com');
+      expect(_viewModel.isFormValid, isTrue);
+      expect(_viewModel.emailError, isNull);
     });
 
-    test('deve retornar erro quando email possuir formato invalido', () {
-      _preencherFormularioValido(viewModel, email: 'test@email');
+    test('deve definir erro quando o e-mail possuir formato inválido', () {
+      // Arrange
+      _preencherFormularioValido(email: 'test@email');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.emailError, 'Formato de e-mail inválido.');
-      expect(viewModel.isFormValid, isFalse);
+      // Assert
+      expect(_viewModel.emailError, 'Formato de e-mail inválido.');
+      expect(_viewModel.isFormValid, isFalse);
     });
 
-    test('deve considerar email valido quando formato estiver correto', () {
-      _preencherFormularioValido(viewModel, email: 'test@email.com');
+    test('deve considerar e-mail válido quando o formato estiver correto', () {
+      // Arrange
+      _preencherFormularioValido(email: 'test@email.com');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.emailError, isNull);
-      expect(viewModel.isFormValid, isTrue);
+      // Assert
+      expect(_viewModel.emailError, isNull);
+      expect(_viewModel.isFormValid, isTrue);
     });
 
-    test('deve limpar erro de email quando email se tornar valido', () {
-      _preencherFormularioValido(viewModel, email: 'test@email');
+    test('deve limpar erro de e-mail quando o valor se tornar válido', () {
+      // Arrange
+      _preencherFormularioValido(email: 'test@email');
+      _viewModel.validateForm();
+      expect(_viewModel.emailError, 'Formato de e-mail inválido.');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.email = 'test@email.com';
+      _viewModel.validateForm();
 
-      expect(viewModel.emailError, 'Formato de e-mail inválido.');
-      expect(viewModel.isFormValid, isFalse);
-
-      viewModel.email = 'test@email.com';
-
-      viewModel.validateForm();
-
-      expect(viewModel.emailError, isNull);
-      expect(viewModel.isFormValid, isTrue);
+      // Assert
+      expect(_viewModel.emailError, isNull);
+      expect(_viewModel.isFormValid, isTrue);
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // RESPONSABILIDADE: Validação do Campo Senha
+  // ---------------------------------------------------------------------------
   group('Senha', () {
-    test('deve retornar erro quando senha for vazia', () {
-      _preencherFormularioValido(viewModel, password: '');
+    test('deve definir erro quando a senha estiver vazia', () {
+      // Arrange
+      _preencherFormularioValido(password: '');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.passwordError, 'Senha obrigatória.');
-      expect(viewModel.isFormValid, isFalse);
+      // Assert
+      expect(_viewModel.passwordError, 'Senha obrigatória.');
+      expect(_viewModel.isFormValid, isFalse);
     });
 
-    test('deve retornar erro quando senha possuir menos de 8 caracteres', () {
-      _preencherFormularioValido(viewModel, password: '1234567');
+    test('deve definir erro quando a senha possuir menos de 8 caracteres', () {
+      // Arrange
+      _preencherFormularioValido(password: '1234567');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
+      // Assert
       expect(
-        viewModel.passwordError,
+        _viewModel.passwordError,
         'A senha deve possuir no mínimo 8 caracteres.',
       );
-      expect(viewModel.isFormValid, isFalse);
+      expect(_viewModel.isFormValid, isFalse);
     });
 
     test(
-      'deve considerar senha valida quando possuir 8 ou mais caracteres',
+      'deve considerar senha válida quando possuir 8 ou mais caracteres',
       () {
-        _preencherFormularioValido(viewModel, password: '12345678');
+        // Arrange
+        _preencherFormularioValido(password: '12345678');
 
-        viewModel.validateForm();
+        // Act
+        _viewModel.validateForm();
 
-        expect(viewModel.passwordError, isNull);
-        expect(viewModel.isFormValid, isTrue);
+        // Assert
+        expect(_viewModel.passwordError, isNull);
+        expect(_viewModel.isFormValid, isTrue);
       },
     );
 
-    test('deve limpar erro de senha quando senha se tornar valida', () {
-      _preencherFormularioValido(viewModel, password: '1234567');
-
-      viewModel.validateForm();
-
+    test('deve limpar erro de senha quando o valor se tornar válido', () {
+      // Arrange
+      _preencherFormularioValido(password: '1234567');
+      _viewModel.validateForm();
       expect(
-        viewModel.passwordError,
+        _viewModel.passwordError,
         'A senha deve possuir no mínimo 8 caracteres.',
       );
-      expect(viewModel.isFormValid, isFalse);
 
-      viewModel.password = '12345678';
-      viewModel.validateForm();
+      // Act
+      _viewModel.password = '12345678';
+      _viewModel.validateForm();
 
-      expect(viewModel.passwordError, isNull);
-      expect(viewModel.isFormValid, isTrue);
+      // Assert
+      expect(_viewModel.passwordError, isNull);
+      expect(_viewModel.isFormValid, isTrue);
     });
   });
 
-  group('Confirmação de senha', () {
-    test('deve retornar erro quando confirmacao for vazia', () {
-      _preencherFormularioValido(viewModel, confirmPassword: '');
+  // ---------------------------------------------------------------------------
+  // RESPONSABILIDADE: Validação da Confirmação de Senha
+  // ---------------------------------------------------------------------------
+  group('Confirmação de Senha', () {
+    test('deve definir erro quando a confirmação estiver vazia', () {
+      // Arrange
+      _preencherFormularioValido(confirmPassword: '');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
+      // Assert
       expect(
-        viewModel.confirmPasswordError,
+        _viewModel.confirmPasswordError,
         'Confirmação de senha obrigatória.',
       );
-      expect(viewModel.isFormValid, isFalse);
+      expect(_viewModel.isFormValid, isFalse);
     });
 
     test(
-      'deve considerar confirmacao valida quando senha e confirmacao forem iguais',
+      'deve considerar confirmação válida quando senha e confirmação forem iguais',
       () {
-        _preencherFormularioValido(viewModel, confirmPassword: '12345678');
+        // Arrange
+        _preencherFormularioValido(confirmPassword: tPassword);
 
-        viewModel.validateForm();
+        // Act
+        _viewModel.validateForm();
 
-        expect(viewModel.confirmPasswordError, isNull);
-        expect(viewModel.isFormValid, isTrue);
+        // Assert
+        expect(_viewModel.confirmPasswordError, isNull);
+        expect(_viewModel.isFormValid, isTrue);
       },
     );
 
-    test('deve retornar erro quando senha e confirmacao forem diferentes', () {
-      _preencherFormularioValido(viewModel, confirmPassword: '87654321');
+    test('deve definir erro quando a senha e confirmação forem diferentes', () {
+      // Arrange
+      _preencherFormularioValido(confirmPassword: 'different_password');
 
-      viewModel.validateForm();
+      // Act
+      _viewModel.validateForm();
 
-      expect(viewModel.confirmPasswordError, 'As senhas não coincidem.');
-      expect(viewModel.isFormValid, isFalse);
+      // Assert
+      expect(_viewModel.confirmPasswordError, 'As senhas não coincidem.');
+      expect(_viewModel.isFormValid, isFalse);
     });
-    test('nao deve validar correspondencia enquanto senha for invalida', () {
-      _preencherFormularioValido(
-        viewModel,
-        password: '1234567',
-        confirmPassword: '12345678',
-      );
 
-      viewModel.validateForm();
+    test(
+      'não deve validar correspondência enquanto a senha principal for inválida',
+      () {
+        // Arrange
+        _preencherFormularioValido(password: '123', confirmPassword: '123');
 
-      expect(
-        viewModel.passwordError,
-        'A senha deve possuir no mínimo 8 caracteres.',
-      );
-      expect(viewModel.confirmPasswordError, isNull);
-      expect(viewModel.isFormValid, isFalse);
+        // Act
+        _viewModel.validateForm();
+
+        // Assert
+        expect(
+          _viewModel.passwordError,
+          'A senha deve possuir no mínimo 8 caracteres.',
+        );
+        expect(_viewModel.confirmPasswordError, isNull);
+        expect(_viewModel.isFormValid, isFalse);
+      },
+    );
+
+    test('deve limpar erro de confirmação quando o valor se tornar válido', () {
+      // Arrange
+      _preencherFormularioValido(confirmPassword: 'wrong');
+      _viewModel.validateForm();
+      expect(_viewModel.confirmPasswordError, 'As senhas não coincidem.');
+
+      // Act
+      _viewModel.confirmPassword = tPassword;
+      _viewModel.validateForm();
+
+      // Assert
+      expect(_viewModel.confirmPasswordError, isNull);
+      expect(_viewModel.isFormValid, isTrue);
     });
-    test('deve limpar erro de confirmacao quando confirmacao se tornar valida',
-        () {
-      _preencherFormularioValido(
-        viewModel,
-        password: '12345678',
-        confirmPassword: '87654321',
-      );
-      viewModel.validateForm();
-      expect(
-        viewModel.confirmPasswordError,
-        'As senhas não coincidem.',
-      );
-      expect(viewModel.isFormValid, isFalse);
-      viewModel.confirmPassword = '12345678';
-      viewModel.validateForm();
-      expect(viewModel.confirmPasswordError, isNull);
-      expect(viewModel.isFormValid, isTrue);
-        });
   });
 
+  // ---------------------------------------------------------------------------
+  // RESPONSABILIDADE: Gestão do Botão de Cadastro
+  // ---------------------------------------------------------------------------
   group('Botão', () {
     test(
       'deve manter o botão desabilitado quando o formulário estiver vazio',
-      () {},
+      () {
+        // Act
+        _viewModel.validateForm();
+
+        // Assert
+        expect(_viewModel.isFormValid, isFalse);
+        expect(_viewModel.isButtonEnabled, isFalse);
+      },
     );
 
-    test(
-      'deve considerar formulario invalido quando existir erro em qualquer campo',
-      () {},
-    );
+    test('deve habilitar o botão quando todos os campos estiverem válidos', () {
+      // Arrange
+      _preencherFormularioValido();
 
-    test(
-      'deve habilitar o botão quando todos os campos estiverem válidos',
-      () {},
-    );
+      // Act
+      _viewModel.validateForm();
 
-    test('deve desabilitar o botão durante o processo de cadastro', () {});
+      // Assert
+      expect(_viewModel.isFormValid, isTrue);
+      expect(_viewModel.isButtonEnabled, isTrue);
+    });
 
     test(
       'deve reabilitar o botão após falha no cadastro respeitando as validações do formulário',
-      () {},
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+        _mockSignUpFailure('Erro');
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        _verifySignUpCalled();
+        expect(_viewModel.isLoading, isFalse);
+        expect(_viewModel.isButtonEnabled, isTrue);
+      },
     );
   });
 
+  // ---------------------------------------------------------------------------
+  // RESPONSABILIDADE: Fluxo de Cadastro
+  // ---------------------------------------------------------------------------
   group('Cadastro', () {
     test(
-      'deve iniciar o estado de carregamento ao solicitar o cadastro',
-      () {},
-    );
-
-    test(
       'deve encerrar o estado de carregamento quando o cadastro for concluído com sucesso',
-      () {},
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+        _mockSignUpSuccess();
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        _verifySignUpCalled();
+        expect(_viewModel.isLoading, isFalse);
+      },
     );
 
     test(
       'deve encerrar o estado de carregamento quando o cadastro falhar',
-      () {},
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+        _mockSignUpFailure('Erro');
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        _verifySignUpCalled();
+        expect(_viewModel.isLoading, isFalse);
+      },
     );
 
     test(
-      'deve chamar o repositório quando todos os campos estiverem válidos',
-      () {},
+      'não deve invocar o repositório quando existir erro de validação no formulário',
+      () async {
+        // Arrange
+        _preencherFormularioValido(password: 'short');
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        expect(_viewModel.isFormValid, isFalse);
+        _verifySignUpNeverCalled();
+      },
     );
 
     test(
-      'não deve chamar o repositório quando existir erro de validação no formulário',
-      () {},
+      'deve sinalizar sucesso com mensagem amigável quando o cadastro for concluído',
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+        _mockSignUpSuccess();
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        _verifySignUpCalled();
+        expect(_viewModel.sucessMessage, 'Cadastro realizado com sucesso.');
+      },
     );
 
-    test('deve sinalizar sucesso quando o cadastro for concluído', () {});
-
-    test('deve enviar os dados preenchidos para o repositorio', () {});
     test(
-      'deve limpar mensagem de erro quando cadastro for concluido com sucesso',
-      () {},
+      'deve enviar os dados preenchidos corretamente para o repositório',
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+        _mockSignUpSuccess();
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        // Utilização do verify explícito para validar argumentos exatos
+        verify(
+          () => _repository.signUpWithEmailAndPassword(
+            name: tName,
+            lastName: tLastName,
+            email: tEmail,
+            password: tPassword,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'deve limpar a mensagem de erro anterior após um novo cadastro realizado com sucesso',
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+        _mockSignUpFailure('Erro');
+        await _viewModel.signUp();
+        expect(_viewModel.errorMessage, 'Erro');
+
+        reset(_repository);
+        _mockSignUpSuccess();
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        expect(_viewModel.errorMessage, isNull);
+      },
     );
   });
 
-  group('Tratamento de Erros', () {
-    test('deve exibir mensagem quando o e-mail já estiver cadastrado', () {});
+  test(
+    'deve validar o formulário automaticamente antes de iniciar o cadastro',
+    () async {
+      // Arrange
+      _preencherFormularioValido(password: '123');
 
+      // Act
+      await _viewModel.signUp();
+
+      // Assert
+      expect(_viewModel.passwordError, isNotNull);
+      expect(_viewModel.isFormValid, isFalse);
+      expect(_viewModel.isLoading, isFalse);
+
+      _verifySignUpNeverCalled();
+    },
+  );
+
+  // ---------------------------------------------------------------------------
+  // RESPONSABILIDADE: Tratamento de Erros de Integração
+  // ---------------------------------------------------------------------------
+  group('Mapeamento de Erros', () {
     test(
-      'deve exibir mensagem quando não houver conexão com a internet',
-      () {},
+      'deve exibir mensagem específica quando o e-mail já estiver cadastrado',
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+        _mockSignUpFailure('E-mail já cadastrado');
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        _verifySignUpCalled();
+        expect(_viewModel.errorMessage, 'E-mail já cadastrado');
+        expect(_viewModel.isLoading, isFalse);
+      },
     );
 
-    test('deve exibir mensagem para erro genérico inesperado', () {});
-
     test(
-      'deve remover o estado de carregamento quando ocorrer erro de e-mail já cadastrado',
-      () {},
+      'deve exibir mensagem de falha na conexão quando o cadastro falhar por falta de internet',
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+        _mockSignUpFailure('Sem conexão com a internet');
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        _verifySignUpCalled();
+        expect(
+          _viewModel.errorMessage,
+          contains(
+            'Sem conexão com a internet. Verifique sua rede e tente novamente.',
+          ),
+        );
+        expect(_viewModel.isLoading, isFalse);
+      },
     );
 
     test(
-      'deve remover o estado de carregamento quando ocorrer erro de conexão',
-      () {},
+      'deve exibir mensagem amigável genérica para erro inesperado no cadastro',
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+        _mockSignUpFailure('Erro inesperado');
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        _verifySignUpCalled();
+        expect(
+          _viewModel.errorMessage,
+          'Ops! Não foi possível concluir o cadastro. Tente novamente mais tarde.',
+        );
+        expect(_viewModel.isLoading, isFalse);
+      },
     );
 
     test(
-      'deve remover o estado de carregamento quando ocorrer erro genérico',
-      () {},
+      'deve limpar a mensagem de sucesso quando um novo cadastro falhar',
+      () async {
+        // Arrange
+        _preencherFormularioValido();
+
+        _mockSignUpSuccess();
+        await _viewModel.signUp();
+
+        expect(_viewModel.sucessMessage, isNotNull);
+
+        reset(_repository);
+
+        _mockSignUpFailure('Erro inesperado');
+
+        // Act
+        await _viewModel.signUp();
+
+        // Assert
+        expect(_viewModel.sucessMessage, isNull);
+        expect(_viewModel.errorMessage, isNotNull);
+      },
     );
   });
-}
-
-void _preencherFormularioValido(
-  SignUpViewModel viewModel, {
-  String name = 'João',
-  String lastName = 'Silva',
-  String email = 'test@email.com',
-  String password = '12345678',
-  String confirmPassword = '12345678',
-}) {
-  viewModel.name = name;
-  viewModel.lastName = lastName;
-  viewModel.email = email;
-  viewModel.password = password;
-  viewModel.confirmPassword = confirmPassword;
 }

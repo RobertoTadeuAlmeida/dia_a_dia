@@ -7,19 +7,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:dia_a_dia/modules/login/repositories/auth_repository.dart';
 
-/// Suíte de Testes Unitários para o [AuthRepository].
-///
-/// Esta classe é responsável por validar a camada de dados da autenticação,
-/// garantindo a integração correta com o SDK do Supabase e a persistência
-/// segura de tokens via Secure Storage.
-///
-/// Responsabilidades testadas:
-/// 1. Comunicação com o backend (Supabase GoTrue).
-/// 2. Persistência local de tokens de sessão.
-/// 3. Tratamento e mapeamento de exceções (AuthException, SocketException).
-/// 4. Gestão de ciclo de vida da sessão (Login, Cadastro, Logout).
-
+// -----------------------------------------------------------------------------
 // Mocks
+// -----------------------------------------------------------------------------
+
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 
 class MockGoTrueClient extends Mock implements GoTrueClient {}
@@ -30,31 +21,115 @@ class MockAuthResponse extends Mock implements AuthResponse {}
 
 class MockSession extends Mock implements Session {}
 
-class MockUserResponse extends Mock implements UserResponse {}
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+late MockGoTrueClient _mockGoTrue;
+late MockFlutterSecureStorage _mockSecureStorage;
+late MockAuthResponse _mockResponse;
+
+void _mockSignUpSuccess() {
+  when(
+    () => _mockGoTrue.signUp(
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+      data: any(named: 'data'),
+    ),
+  ).thenAnswer((_) async => _mockResponse);
+}
+
+void _mockSignUpFailure(Object error) {
+  when(
+    () => _mockGoTrue.signUp(
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+      data: any(named: 'data'),
+    ),
+  ).thenThrow(error);
+}
+
+void _mockSignInSuccess({String token = 'token_valido'}) {
+  final mockSession = MockSession();
+  when(() => mockSession.accessToken).thenReturn(token);
+  when(() => _mockResponse.session).thenReturn(mockSession);
+
+  when(
+    () => _mockGoTrue.signInWithPassword(
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+    ),
+  ).thenAnswer((_) async => _mockResponse);
+
+  when(
+    () => _mockSecureStorage.write(
+      key: any(named: 'key'),
+      value: any(named: 'value'),
+    ),
+  ).thenAnswer((_) async {});
+}
+
+void _mockSignInFailure(Object error) {
+  when(
+    () => _mockGoTrue.signInWithPassword(
+      email: any(named: 'email'),
+      password: any(named: 'password'),
+    ),
+  ).thenThrow(error);
+}
+
+void _verifySignUpCalled({
+  required String email,
+  required String password,
+  required Map<String, dynamic> data,
+}) {
+  verify(
+    () => _mockGoTrue.signUp(
+      email: email,
+      password: password,
+      data: data,
+    ),
+  ).called(1);
+}
+
+void _verifyTokenPersisted({String token = 'token_valido'}) {
+  verify(
+    () => _mockSecureStorage.write(
+      key: 'auth_session',
+      value: token,
+    ),
+  ).called(1);
+}
+
+void _verifyTokenNotPersisted() {
+  verifyNever(
+    () => _mockSecureStorage.write(
+      key: any(named: 'key'),
+      value: any(named: 'value'),
+    ),
+  );
+}
 
 void main() {
   late AuthRepository repository;
   late MockSupabaseClient mockSupabaseClient;
-  late MockGoTrueClient mockGoTrue;
-  late MockFlutterSecureStorage mockSecureStorage;
-  late MockAuthResponse mockResponse;
 
-  const name = 'João';
-  const email = 'test@email.com';
-  const password = 'password123';
-  const lastName = 'Silva';
+  const tName = 'João';
+  const tEmail = 'test@email.com';
+  const tPassword = 'password123';
+  const tLastName = 'Silva';
 
   setUp(() {
     mockSupabaseClient = MockSupabaseClient();
-    mockGoTrue = MockGoTrueClient();
-    mockSecureStorage = MockFlutterSecureStorage();
-    mockResponse = MockAuthResponse();
+    _mockGoTrue = MockGoTrueClient();
+    _mockSecureStorage = MockFlutterSecureStorage();
+    _mockResponse = MockAuthResponse();
 
-    when(() => mockSupabaseClient.auth).thenReturn(mockGoTrue);
+    when(() => mockSupabaseClient.auth).thenReturn(_mockGoTrue);
 
     repository = AuthRepository(
       supabaseClient: mockSupabaseClient,
-      secureStorage: mockSecureStorage,
+      secureStorage: _mockSecureStorage,
     );
   });
 
@@ -66,98 +141,94 @@ void main() {
     test(
       'deve invocar o fluxo de cadastro do Supabase com os metadados corretos',
       () async {
-        when(
-          () => mockGoTrue.signUp(
-            email: email,
-            password: password,
-            data: {'name': name, 'last_name': lastName},
-          ),
-        ).thenAnswer((_) async => mockResponse);
+        // Arrange
+        _mockSignUpSuccess();
 
-        await expectLater(
-          repository.signUpWithEmailAndPassword(
-            name: name,
-            lastName: lastName,
-            email: email,
-            password: password,
-          ),
-          completes,
+        // Act
+        await repository.signUpWithEmailAndPassword(
+          name: tName,
+          lastName: tLastName,
+          email: tEmail,
+          password: tPassword,
         );
 
-        verify(
-          () => mockGoTrue.signUp(
-            email: email,
-            password: password,
-            data: {'name': name, 'last_name': lastName},
-          ),
-        ).called(1);
+        // Assert
+        _verifySignUpCalled(
+          email: tEmail,
+          password: tPassword,
+          data: {'name': tName, 'last_name': tLastName},
+        );
       },
     );
-    test('deve lancar erro de conexao quando nao houver internet', () async {
-      when(
-        () => mockGoTrue.signUp(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-          data: any(named: 'data'),
-        ),
-      ).thenThrow(SocketException('Network unreachable'));
 
-      await expectLater(
-        repository.signUpWithEmailAndPassword(
-          name: name,
-          lastName: lastName,
-          email: email,
-          password: password,
-        ),
-        throwsA(
-          predicate<Exception>(
-            (e) => e.toString().contains('Sem conexão com a internet.'),
+    test(
+      'deve lançar erro de conexão quando o Supabase disparar SocketException durante o cadastro',
+      () async {
+        // Arrange
+        _mockSignUpFailure(const SocketException('Network unreachable'));
+
+        // Act & Assert
+        await expectLater(
+          repository.signUpWithEmailAndPassword(
+            name: tName,
+            lastName: tLastName,
+            email: tEmail,
+            password: tPassword,
           ),
-        ),
-      );
-    });
-
-    test('deve lançar erro generico quando ocorrer falha inesperada', () async {
-      when(
-        () => mockGoTrue.signUp(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-          data: any(named: 'data'),
-        ),
-      ).thenThrow(Exception('Server error'));
-      await expectLater(
-        repository.signUpWithEmailAndPassword(
-          name: name,
-          lastName: lastName,
-          email: email,
-          password: password,
-        ),
-        throwsA(predicate<Exception>((e) => e.toString().contains('Ops! Não foi possível concluir o cadastro. Tente novamente mais tarde.'))),
-      );
-    });
-
-    test('deve lançar exceção quando o e-mail ja estiver em uso', () async {
-      when(
-        () => mockGoTrue.signUp(
-          password: any(named: 'password'),
-          email: any(named: 'email'),
-          data: any(named: 'data'),
-        ),
-      ).thenThrow(AuthException('User already registered'));
-      await expectLater(
-        () => repository.signUpWithEmailAndPassword(
-          name: name,
-          lastName: lastName,
-          email: email,
-          password: password,
-        ),
-        throwsA(
-          predicate<Exception>(
-            (e) => e.toString().contains('Este e-mail já está em uso.'),
+          throwsA(
+            predicate<Exception>(
+              (e) => e.toString().contains('Sem conexão com a internet.'),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
+
+    test(
+      'deve mapear exceção desconhecida para erro inesperado durante o cadastro',
+      () async {
+        // Arrange
+        _mockSignUpFailure(Exception('Server error'));
+
+        // Act & Assert
+        await expectLater(
+          repository.signUpWithEmailAndPassword(
+            name: tName,
+            lastName: tLastName,
+            email: tEmail,
+            password: tPassword,
+          ),
+          throwsA(
+            predicate<Exception>(
+              (e) => e.toString().contains('Erro inesperado'),
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
+      'deve lançar exceção específica quando o e-mail já estiver em uso',
+      () async {
+        // Arrange
+        _mockSignUpFailure(const AuthException('User already registered'));
+
+        // Act & Assert
+        await expectLater(
+          () => repository.signUpWithEmailAndPassword(
+            name: tName,
+            lastName: tLastName,
+            email: tEmail,
+            password: tPassword,
+          ),
+          throwsA(
+            predicate<Exception>(
+              (e) => e.toString().contains('Este e-mail já está em uso.'),
+            ),
+          ),
+        );
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -168,77 +239,54 @@ void main() {
     test(
       'deve persistir o token de acesso localmente quando o login for bem-sucedido',
       () async {
-        final mockSession = MockSession();
-        final mockResponse = MockAuthResponse();
+        // Arrange
+        const tToken = 'token_valido';
+        _mockSignInSuccess(token: tToken);
 
-        when(() => mockSession.accessToken).thenReturn('token_valido');
-        when(() => mockResponse.session).thenReturn(mockSession);
-        when(
-          () => mockGoTrue.signInWithPassword(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ),
-        ).thenAnswer((_) async => mockResponse);
-        when(
-          () => mockSecureStorage.write(
-            key: any(named: 'key'),
-            value: any(named: 'value'),
-          ),
-        ).thenAnswer((_) async {});
+        // Act
+        await repository.signInWithEmailAndPassword(tEmail, tPassword);
 
-        await repository.signInWithEmailAndPassword(email, password);
+        // Assert
+        _verifyTokenPersisted(token: tToken);
 
-        verify(
-          () => mockSecureStorage.write(
-            key: 'auth_session',
-            value: 'token_valido',
-          ),
-        ).called(1);
       },
     );
 
     test(
-      'deve lançar exceção tratada quando o servidor retornar uma sessão sem token',
+      'deve mapear exceção desconhecida para erro inesperado quando o servidor retornar uma sessão sem token',
       () async {
-        final mockSession = MockSession();
-        final mockResponse = MockAuthResponse();
-
-        // session existe mas accessToken é nulo
-        when(() => mockSession.accessToken).thenReturn('');
-        when(() => mockResponse.session).thenReturn(null);
+        // Arrange
+        when(() => _mockResponse.session).thenReturn(null);
         when(
-          () => mockGoTrue.signInWithPassword(
+          () => _mockGoTrue.signInWithPassword(
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
-        ).thenAnswer((_) async => mockResponse);
+        ).thenAnswer((_) async => _mockResponse);
 
+        // Act & Assert
         await expectLater(
-          repository.signInWithEmailAndPassword(email, password),
-          throwsA(predicate<Exception>((e) => e.toString().contains('Ops!'))),
-        );
-
-        verifyNever(
-          () => mockSecureStorage.write(
-            key: any(named: 'key'),
-            value: any(named: 'value'),
+          repository.signInWithEmailAndPassword(tEmail, tPassword),
+          throwsA(
+            predicate<Exception>(
+              (e) => e.toString().contains('Erro inesperado'),
+            ),
           ),
         );
+
+        _verifyTokenNotPersisted();
       },
     );
 
     test(
       'deve mapear erro de credenciais inválidas quando o servidor retornar Invalid login credentials',
       () async {
-        when(
-          () => mockGoTrue.signInWithPassword(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ),
-        ).thenThrow(const AuthException('Invalid login credentials'));
+        // Arrange
+        _mockSignInFailure(const AuthException('Invalid login credentials'));
 
+        // Act & Assert
         await expectLater(
-          repository.signInWithEmailAndPassword(email, password),
+          repository.signInWithEmailAndPassword(tEmail, tPassword),
           throwsA(
             predicate<Exception>(
               (e) => e.toString().contains('E-mail ou senha inválidos.'),
@@ -251,15 +299,12 @@ void main() {
     test(
       'deve mapear erro de credenciais inválidas quando o servidor retornar Unprocessable entity',
       () async {
-        when(
-          () => mockGoTrue.signInWithPassword(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ),
-        ).thenThrow(const AuthException('Unprocessable entity'));
+        // Arrange
+        _mockSignInFailure(const AuthException('Unprocessable entity'));
 
+        // Act & Assert
         await expectLater(
-          repository.signInWithEmailAndPassword(email, password),
+          repository.signInWithEmailAndPassword(tEmail, tPassword),
           throwsA(
             predicate<Exception>(
               (e) => e.toString().contains('E-mail ou senha inválidos.'),
@@ -270,17 +315,14 @@ void main() {
     );
 
     test(
-      'deve lançar mensagem de falha na conexão quando ocorrer uma SocketException',
+      'deve lançar erro de conexão quando o Supabase disparar SocketException no login',
       () async {
-        when(
-          () => mockGoTrue.signInWithPassword(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ),
-        ).thenThrow(const SocketException('No internet'));
+        // Arrange
+        _mockSignInFailure(const SocketException('No internet'));
 
+        // Act & Assert
         await expectLater(
-          repository.signInWithEmailAndPassword(email, password),
+          repository.signInWithEmailAndPassword(tEmail, tPassword),
           throwsA(
             predicate<Exception>(
               (e) => e.toString().contains('Sem conexão com a internet.'),
@@ -291,34 +333,28 @@ void main() {
     );
 
     test(
-      'deve lançar mensagem genérica de sistema quando ocorrer um erro desconhecido no backend',
+      'deve retornar erro inesperado quando ocorrer erro desconhecido no login',
       () async {
-        when(
-          () => mockGoTrue.signInWithPassword(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ),
-        ).thenThrow(const AuthException('Server error'));
+        // Arrange
+        _mockSignInFailure(const AuthException('Server error'));
 
+        // Act & Assert
         await expectLater(
-          repository.signInWithEmailAndPassword(email, password),
-          throwsA(predicate<Exception>((e) => e.toString().contains('Ops!'))),
+          repository.signInWithEmailAndPassword(tEmail, tPassword),
+          throwsA(
+            predicate<Exception>(
+              (e) => e.toString().contains('Erro inesperado'),
+            ),
+          ),
         );
       },
     );
   });
 
-  // ---------------------------------------------------------------------------
-  // signInWithGoogle
-  // ---------------------------------------------------------------------------
-
-  // TODO(FN0001-GOOGLE):
-  // Reativar testes do OAuth quando o callback
-  // estiver concluído e o fluxo estiver estável.
   // group('signInWithGoogle', () {
   //   test('deve iniciar fluxo OAuth com Google', () async {
   //     when(
-  //       () => mockGoTrue.signInWithOAuth(
+  //       () => _mockGoTrue.signInWithOAuth(
   //         OAuthProvider.google,
   //         redirectTo: any(named: 'redirectTo'),
   //       ),
@@ -327,7 +363,7 @@ void main() {
   //     await repository.signInWithGoogle();
   //
   //     verify(
-  //       () => mockGoTrue.signInWithOAuth(
+  //       () => _mockGoTrue.signInWithOAuth(
   //         OAuthProvider.google,
   //         redirectTo: 'io.supabase.flutter://login-callback',
   //       ),
@@ -338,7 +374,7 @@ void main() {
   //     'deve lançar mensagem de sem conexão quando SocketException ocorrer no Google Login',
   //     () async {
   //       when(
-  //         () => mockGoTrue.signInWithOAuth(
+  //         () => _mockGoTrue.signInWithOAuth(
   //           OAuthProvider.google,
   //           redirectTo: any(named: 'redirectTo'),
   //         ),
@@ -359,7 +395,7 @@ void main() {
   //     'deve lançar mensagem genérica quando OAuth falhar com erro desconhecido',
   //     () async {
   //       when(
-  //         () => mockGoTrue.signInWithOAuth(
+  //         () => _mockGoTrue.signInWithOAuth(
   //           OAuthProvider.google,
   //           redirectTo: any(named: 'redirectTo'),
   //         ),
@@ -367,7 +403,7 @@ void main() {
   //
   //       await expectLater(
   //         repository.signInWithGoogle(),
-  //         throwsA(predicate<Exception>((e) => e.toString().contains('Ops!'))),
+  //         throwsA(predicate<Exception>((e) => e.toString().contains('Erro inesperado'))),
   //       );
   //     },
   //   );
@@ -381,30 +417,35 @@ void main() {
     test(
       'deve limpar os dados persistidos localmente ao realizar o logout',
       () async {
-        when(() => mockGoTrue.signOut()).thenAnswer((_) async {});
+        // Arrange
+        when(() => _mockGoTrue.signOut()).thenAnswer((_) async {});
         when(
-          () => mockSecureStorage.delete(key: any(named: 'key')),
+          () => _mockSecureStorage.delete(key: any(named: 'key')),
         ).thenAnswer((_) async {});
 
+        // Act
         await repository.signOut();
 
-        verify(() => mockSecureStorage.delete(key: 'auth_session')).called(1);
+        // Assert
+        verify(() => _mockGoTrue.signOut()).called(1);
+        verify(() => _mockSecureStorage.delete(key: 'auth_session')).called(1);
       },
     );
 
     test(
       'deve garantir a limpeza local mesmo se a chamada remota ao Supabase falhar',
       () async {
+        // Arrange
+        when(() => _mockGoTrue.signOut()).thenThrow(Exception('Supabase indisponível'));
         when(
-          () => mockGoTrue.signOut(),
-        ).thenThrow(Exception('Supabase indisponível'));
-        when(
-          () => mockSecureStorage.delete(key: any(named: 'key')),
+          () => _mockSecureStorage.delete(key: any(named: 'key')),
         ).thenAnswer((_) async {});
 
+        // Act
         await repository.signOut();
 
-        verify(() => mockSecureStorage.delete(key: 'auth_session')).called(1);
+        // Assert
+        verify(() => _mockSecureStorage.delete(key: 'auth_session')).called(1);
       },
     );
   });
@@ -417,12 +458,15 @@ void main() {
     test(
       'deve retornar verdadeiro quando existir um token persistido',
       () async {
+        // Arrange
         when(
-          () => mockSecureStorage.read(key: any(named: 'key')),
+          () => _mockSecureStorage.read(key: any(named: 'key')),
         ).thenAnswer((_) async => 'token_valido');
 
+        // Act
         final result = await repository.hasValidSession();
 
+        // Assert
         expect(result, isTrue);
       },
     );
@@ -430,12 +474,15 @@ void main() {
     test(
       'deve retornar falso quando não houver token persistido (nulo)',
       () async {
+        // Arrange
         when(
-          () => mockSecureStorage.read(key: any(named: 'key')),
+          () => _mockSecureStorage.read(key: any(named: 'key')),
         ).thenAnswer((_) async => null);
 
+        // Act
         final result = await repository.hasValidSession();
 
+        // Assert
         expect(result, isFalse);
       },
     );
@@ -443,12 +490,15 @@ void main() {
     test(
       'deve retornar falso quando o token persistido for uma string vazia',
       () async {
+        // Arrange
         when(
-          () => mockSecureStorage.read(key: any(named: 'key')),
+          () => _mockSecureStorage.read(key: any(named: 'key')),
         ).thenAnswer((_) async => '');
 
+        // Act
         final result = await repository.hasValidSession();
 
+        // Assert
         expect(result, isFalse);
       },
     );

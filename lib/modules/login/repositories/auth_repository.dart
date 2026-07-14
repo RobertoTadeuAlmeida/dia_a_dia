@@ -165,6 +165,6 @@ class AuthRepository {
   }
 
   String _defaultErrorMessage() {
-    return 'Ops! Não foi possível concluir o cadastro. Tente novamente mais tarde.';
+    return 'Erro inesperado';
   }
 }

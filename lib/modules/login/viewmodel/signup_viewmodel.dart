@@ -3,37 +3,56 @@ import '../repositories/auth_repository.dart';
 
 class SignUpViewModel extends ChangeNotifier {
   final AuthRepository _repository;
+  bool _isDisposed = false;
 
   SignUpViewModel({required AuthRepository repository}) : _repository = repository;
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+    }
+  }
 
   String _name = '';
   String get name => _name;
   set name(String value) {
     _name = value;
+    validateForm();
   }
 
   String _lastName = '';
   String get lastName => _lastName;
   set lastName(String value) {
     _lastName = value;
+    validateForm();
   }
 
   String _email = '';
   String get email => _email;
   set email(String value) {
     _email = value;
+    validateForm();
   }
 
   String _password = '';
   String get password => _password;
   set password(String value) {
     _password = value;
+    validateForm();
   }
 
   String _confirmPassword = '';
   String get confirmPassword => _confirmPassword;
   set confirmPassword(String value) {
     _confirmPassword = value;
+    validateForm();
   }
 
   String? _nameError;
@@ -51,14 +70,21 @@ class SignUpViewModel extends ChangeNotifier {
   String? _confirmPasswordError;
   String? get confirmPasswordError => _confirmPasswordError;
 
-  bool _isFormValid = true;
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
+  String? _sucessMessage;
+  String? get sucessMessage => _sucessMessage;
+
+  bool _isFormValid = false;
   bool get isFormValid => _isFormValid;
 
-  void validateForm() {
-    _name = _name.trim();
-    _lastName = _lastName.trim();
-    _email = _email.trim();
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
+  bool get isButtonEnabled => _isFormValid && !_isLoading;
+
+  void validateForm() {
     _validateName();
     _validateLastName();
     _validateEmail();
@@ -69,40 +95,56 @@ class SignUpViewModel extends ChangeNotifier {
         _lastNameError == null &&
         _emailError == null &&
         _passwordError == null &&
-        _confirmPasswordError == null;
+        _confirmPasswordError == null &&
+        _name.trim().isNotEmpty &&
+        _lastName.trim().isNotEmpty &&
+        _email.trim().isNotEmpty &&
+        _password.isNotEmpty &&
+        _confirmPassword.isNotEmpty;
 
     notifyListeners();
   }
 
   void _validateName() {
-    if (_name.isEmpty) {
+    final trimmed = _name.trim();
+    if (trimmed.isEmpty) {
       _nameError = 'Nome obrigatório.';
-    } else if (_name.length < 2) {
+    } else if (trimmed.length < 2) {
       _nameError = 'O nome deve possuir no mínimo 2 caracteres.';
     } else {
       _nameError = null;
+      _name = trimmed;
     }
   }
 
   void _validateLastName() {
-    if (_lastName.isEmpty) {
+    final trimmed = _lastName.trim();
+    if (trimmed.isEmpty) {
       _lastNameError = 'Sobrenome obrigatório.';
-    } else if (_lastName.length < 2) {
+    } else if (trimmed.length < 2) {
       _lastNameError = 'O sobrenome deve possuir no mínimo 2 caracteres.';
     } else {
       _lastNameError = null;
+      _lastName = trimmed;
     }
   }
 
   void _validateEmail() {
-    if (_email.isEmpty) {
+    final trimmed = _email.trim();
+    if (trimmed.isEmpty) {
       _emailError = 'E-mail obrigatório.';
     } else {
-      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-      if (!emailRegex.hasMatch(_email)) {
+      final emailUri = Uri.tryParse('mailto:$trimmed');
+      final bool isValid = emailUri != null &&
+          emailUri.path == trimmed &&
+          trimmed.contains('@') &&
+          trimmed.split('@').last.contains('.');
+
+      if (!isValid) {
         _emailError = 'Formato de e-mail inválido.';
       } else {
         _emailError = null;
+        _email = trimmed;
       }
     }
   }
@@ -124,6 +166,42 @@ class SignUpViewModel extends ChangeNotifier {
       _confirmPasswordError = 'As senhas não coincidem.';
     } else {
       _confirmPasswordError = null;
+    }
+  }
+
+  Future<void> signUp() async {
+    validateForm();
+    if (!_isFormValid) return;
+
+    _isLoading = true;
+    _errorMessage = null;
+    _sucessMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.signUpWithEmailAndPassword(
+        name: _name,
+        lastName: _lastName,
+        email: _email,
+        password: _password,
+      );
+      _sucessMessage = 'Cadastro realizado com sucesso.';
+      _errorMessage = null;
+    } catch (e) {
+      _sucessMessage = null;
+      final message = e.toString().replaceFirst('Exception: ', '');
+      if (message == 'Sem conexão com a internet') {
+        _errorMessage =
+            'Sem conexão com a internet. Verifique sua rede e tente novamente.';
+      } else if (message == 'Erro inesperado') {
+        _errorMessage =
+            'Ops! Não foi possível concluir o cadastro. Tente novamente mais tarde.';
+      } else {
+        _errorMessage = message;
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 }
