@@ -1,0 +1,5 @@
+- [x] Atualizar nomes de métodos no Fluxo MVVM (`signInWithEmailAndPassword`, `signInWithGoogle`)
+- [x] Refletir uso de `LoginValidators` na sequência da View
+- [x] Alinhar mensagens de erro com o `AuthRepository`
+- [x] Adicionar referências aos métodos de sessão (`checkSession`, `hasValidSession`, `restoreSession`)
+- [x] Atualizar seção de Logout para mencionar `signOut()`

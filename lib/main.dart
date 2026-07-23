@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/supabase_config.dart';
+import 'core/routes/app_routes.dart';
+import 'core/theme/app_theme.dart';
 import 'modules/login/view/pages/login_page.dart';
 
 void main() async {
@@ -43,13 +45,9 @@ class DiaADiaApp extends StatelessWidget {
     return MaterialApp(
       title: 'Dia A Dia',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Inter',
-        scaffoldBackgroundColor: const Color(0xFFEEF0F8),
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3B4FE8)),
-        useMaterial3: true,
-      ),
-      home: const LoginPage(),
+      theme: AppTheme.light(),
+      initialRoute: AppRoutes.login,
+      routes: AppRoutes.routes,
     );
   }
 }

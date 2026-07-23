@@ -1,11 +1,14 @@
+import 'package:dia_a_dia/core/constants/app_keys.dart';
+import 'package:dia_a_dia/core/widgets/error_message.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../home/view/home_page.dart';
 import '../../models/auth_status.dart';
+import '../../utils/login_validators.dart';
 import '../../viewmodel/auth_viewmodel.dart';
-import 'widgets/app_logo.dart';
-import 'widgets/login_card.dart';
+import '../widgets/auth_header.dart';
+import '../widgets/login_card.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -60,26 +63,34 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const SizedBox(height: 56),
 
-              const AppLogo(),
+              const AuthHeader(),
 
               const SizedBox(height: 40),
 
-              LoginCard(
-                formKey: formKey,
-                emailController: emailController,
-                passwordController: passwordController,
-                obscurePassword: obscurePassword,
-                onTogglePassword: togglePasswordVisibility,
-                isLoading: isLoading,
-                onSignIn: _handleSignIn,
-                onGoogleSignIn: _handleGoogleSignIn,
+              Form(
+                key: formKey,
+                child: LoginCard(
+                  emailController: emailController,
+                  passwordController: passwordController,
+                  emailValidator: LoginValidators.email,
+                  passwordValidator: LoginValidators.password,
+                  obscurePassword: obscurePassword,
+                  onTogglePassword: togglePasswordVisibility,
+                  isLoading: isLoading,
+                  onSignIn: _handleSignIn,
+                  onGoogleSignIn: _handleGoogleSignIn,
+                ),
               ),
+
+              const SizedBox(height: 16),
+
+              ErrorMessage(message: authViewModel.errorMessage),
 
               const SizedBox(height: 28),
 
               _SignUpText(
                 onTap: () {
-                  //TODO: navegar para cadastro.
+                  Navigator.of(context).pushNamed('/signup');
                 },
               ),
 
@@ -140,17 +151,23 @@ class _SignUpText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        text: 'Não tem uma conta? ',
-        style: const TextStyle(color: Color(0xFF8E94A3), fontSize: 14),
-        children: [
-          TextSpan(
-            text: 'Criar conta',
-            style: const TextStyle(),
-            recognizer: TapGestureRecognizer()..onTap = onTap,
-          ),
-        ],
+    return GestureDetector(
+      key: AppKeys.createAccountButton,
+      onTap: onTap,
+      child: Text.rich(
+        TextSpan(
+          text: 'Não tem uma conta? ',
+          style: const TextStyle(color: Color(0xFF8E94A3), fontSize: 14),
+          children: [
+            TextSpan(
+              text: 'Criar conta',
+              style: const TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
