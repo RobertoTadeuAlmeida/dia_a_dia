@@ -1,25 +1,32 @@
-# Plano de Ação - Refinamento da Documentação FN0001
+# Ignorar Arquivos e Diretórios Particulares (Dotfiles)
 
-O objetivo é atualizar a documentação `docs/features/auth/FN0001_autenticar_usuario.md` para refletir exatamente os nomes de métodos e a lógica de fluxo implementada atualmente no projeto (TDD e MVVM).
+O objetivo é atualizar o arquivo `.gitignore` para garantir que todos os arquivos e diretórios que começam com ponto (`.`) sejam ignorados pelo Git, tornando-os particulares e evitando que sejam incluídos nos commits.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> A documentação será ajustada para usar `signInWithEmailAndPassword` e `signInWithGoogle` em vez de um genérico `signIn()`. Também incluirei os métodos de gerenciamento de sessão como `checkSession`.
+> Adicionarei o padrão `.*` ao `.gitignore`. Para evitar que o próprio arquivo `.gitignore` e outros arquivos de configuração essenciais do Flutter (como `.metadata`) sejam ignorados acidentalmente, utilizarei exceções (`!`).
+>
+> Arquivos que **continuarão** sendo rastreados:
+> - `.gitignore`
+> - `.metadata` (necessário para o Flutter saber a versão/tipo do projeto)
 
 ## Mudanças Propostas
 
-### Documentação
+### Git Configuration
 
-#### [MODIFY] [FN0001_autenticar_usuario.md](file:///home/rtadeu/Dev/FlutterProject/dia_a_dia/docs/features/auth/FN0001_autenticar_usuario.md)
-- Atualizar a seção **Fluxo MVVM > Sequência** para:
-    - Alterar `signIn()` para `signInWithEmailAndPassword()` e `signInWithGoogle()`.
-    - Refletir que a View (`LoginPage`) utiliza `LoginValidators` para a validação visual antes de chamar a ViewModel.
-- Revisar as mensagens de erro nos requisitos funcionais (ex: RF009) para alinhar com o que o `AuthRepository` retorna (ex: "Erro inesperado" em vez de uma frase longa).
-- Adicionar os nomes dos métodos de persistência na seção RF010: `checkSession`, `hasValidSession` e `restoreSession`.
-- Atualizar RF012 para mencionar o método `signOut()`.
+#### [MODIFY] [.gitignore](file:///home/rtadeu/Dev/FlutterProject/dia_a_dia/.gitignore)
+- Adicionar uma nova seção no início do arquivo para ignorar dotfiles:
+```gitignore
+# Private dotfiles and directories
+.*
+!.gitignore
+!.metadata
+```
 
 ## Plano de Verificação
 
 ### Verificação Manual
-- Comparar o arquivo MD final com as classes `AuthViewModel.dart` e `AuthRepository.dart` para garantir 100% de paridade nos nomes dos métodos.
+- Executar `git check-ignore -v .artifacts` para confirmar que o diretório está sendo ignorado.
+- Executar `git check-ignore -v .senhaSB.txt` para confirmar que o arquivo está sendo ignorado.
+- Garantir que `git check-ignore -v .gitignore` retorne que o arquivo **não** está sendo ignorado.

@@ -1,3 +1,8 @@
+# Private dotfiles and directories
+.*
+!.gitignore
+!.metadata
+
 # Miscellaneous
 *.class
 *.log
