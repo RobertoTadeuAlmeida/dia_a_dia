@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dia_a_dia/core/constants/app_keys.dart';
 import '../theme/app_theme.dart';
 
 class PrimaryButton extends StatelessWidget {
@@ -19,7 +20,6 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Resolve as cores do tema ativo (light ou dark) em tempo de execução
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = colorScheme.brightness == Brightness.dark;
 
@@ -51,7 +51,7 @@ class PrimaryButton extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           child: isLoading
               ? SizedBox(
-            key: const ValueKey('loading'),
+            key: AppKeys.primaryButtonLoading,
             width: 20,
             height: 20,
             child: CircularProgressIndicator(

@@ -30,8 +30,8 @@ class LoginCard extends StatelessWidget {
   final bool obscurePassword;
 
   final VoidCallback onTogglePassword;
-  final VoidCallback onSignIn;
-  final VoidCallback onGoogleSignIn;
+  final VoidCallback? onSignIn;
+  final VoidCallback? onGoogleSignIn;
   final bool isLoading;
 
   @override
@@ -39,6 +39,7 @@ class LoginCard extends StatelessWidget {
     return AuthCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           AuthTextField(
             key: AppKeys.loginEmailField,
@@ -50,7 +51,7 @@ class LoginCard extends StatelessWidget {
             textInputAction: TextInputAction.next,
             validator: emailValidator,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           AuthTextField(
             key: AppKeys.loginPasswordField,
             controller: passwordController,
@@ -60,14 +61,9 @@ class LoginCard extends StatelessWidget {
             obscureText: obscurePassword,
             textInputAction: TextInputAction.done,
             validator: passwordValidator,
-            suffixIcon: IconButton(
-              onPressed: onTogglePassword,
-              icon: Icon(
-                obscurePassword
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
-            ),
+            isPassword: true,
+            toggleKey: const ValueKey('login_password_toggle'),
+            onTogglePasswordVisibility: onTogglePassword,
           ),
           const SizedBox(height: 24),
           PrimaryButton(
@@ -80,7 +76,7 @@ class LoginCard extends StatelessWidget {
           SocialLoginButton(
             key: AppKeys.googleLoginButton,
             onPressed: onGoogleSignIn,
-            isLoading: false, // Evita duplicidade de CircularProgressIndicator para o teste
+            isLoading: false,
           ),
         ],
       ),

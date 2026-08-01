@@ -1,4 +1,8 @@
-- [ ] Adicionar regras de exclusão de dotfiles no `.gitignore`
-- [ ] Verificar se `.artifacts` está sendo ignorado
-- [ ] Verificar se `.senhaSB.txt` está sendo ignorado
-- [ ] Garantir que `.gitignore` e `.metadata` não sejam ignorados
+- [x] Criar widget `SuccessMessage` em `lib/core/widgets/success_message.dart`
+- [/] Implementar `SignupPage` em `lib/modules/login/view/pages/signup_page.dart`
+    - [ ] Adicionar controllers e listeners
+    - [ ] Montar estrutura visual com `AppKeys`
+    - [ ] Integrar com `SignUpViewModel`
+    - [ ] Implementar navegação de sucesso e retorno
+- [ ] Executar testes: `flutter test test/modules/login/view/pages/signup_page_test.dart`
+- [ ] Verificar estado GREEN

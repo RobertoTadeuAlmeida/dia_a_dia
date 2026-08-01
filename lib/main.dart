@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/supabase_config.dart';
 import 'core/routes/app_routes.dart';
+import 'core/routes/route_names.dart';
 import 'core/theme/app_theme.dart';
 import 'modules/login/view/pages/login_page.dart';
 
@@ -46,7 +47,7 @@ class DiaADiaApp extends StatelessWidget {
       title: 'Dia A Dia',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      initialRoute: AppRoutes.login,
+      initialRoute: RouteNames.login,
       routes: AppRoutes.routes,
     );
   }

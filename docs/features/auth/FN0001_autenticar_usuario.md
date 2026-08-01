@@ -11,14 +11,25 @@ de login, onde o usuário deve fornecer credenciais validas.
 
 ---
 
-## Fluxo Principal
+## Fluxo Principal (Funcional)
 
 1. Usuário acessa a tela de login.
 2. Usuário informa e-mail e senha.
-3. Sistema valida os campos.
-4. Sistema realiza autenticação.
+3. Sistema valida os campos localmente.
+4. Sistema realiza autenticação via Supabase.
 5. Sistema retorna sucesso ou erro.
 6. Usuário autenticado é redirecionado para a tela inicial.
+
+---
+
+## Fluxo do Usuário
+
+1. Abrir tela
+2. Preencher e-mail
+3. Preencher senha
+4. Acionar ação de Entrar
+5. Aguardar processamento (Loading)
+6. Redirecionamento para Home (Sucesso) ou Exibição de Mensagem (Erro)
 
 ---
 
@@ -26,7 +37,8 @@ de login, onde o usuário deve fornecer credenciais validas.
 
 #### Diagrama
 
-!image.png
+> [!NOTE]
+> Diagrama de sequência representando a interação entre as camadas.
 
 #### Sequência
 
@@ -50,269 +62,106 @@ de login, onde o usuário deve fornecer credenciais validas.
 
 ---
 
+## Validações de Campo
 
-## Interface (Wireframe)
+### Campo: E-mail
+| Regra | Mensagem de Erro |
+| --- | --- |
+| Preenchimento obrigatório | `Informe seu e-mail` |
+| Formato de e-mail inválido | `E-mail inválido` |
 
-![Tela de Autenticação](dia_a_dia/docs/features/auth/assets/FN0001_tela-login.png)
+### Campo: Senha
+| Regra                     | Mensagem de Erro                           |
+|---------------------------|--------------------------------------------|
+| Preenchimento obrigatório | `Informe sua senha`                        |
+| Mínimo de 8 caracteres    | `A senha deve ter pelo menos 8 caracteres` |
 
+---
+
+## Matriz de Navegação
+
+| Origem | Ação | Destino | Condição |
+| --- | --- | --- | --- |
+| Login | Clique em "Criar conta" | Cadastro (Signup) | Sempre |
+| Login | Login com E-mail/Senha | Home | Credenciais válidas |
+| Login | Login com Google | Home | Autenticação Google confirmada |
+| Inicialização | Automática | Home | Sessão ativa e válida |
+| Inicialização | Automática | Login | Sem sessão ativa |
 
 ---
 
 ## Requisitos funcionais
 
 ### RF001 — Exibir tela de login
-
 - O sistema deve disponibilizar a tela de login através da rota `/`.
 - A tela de login deve ser apresentada para usuários não autenticados ao iniciar a aplicação.
 - Usuários autenticados não devem acessar a tela de login, devendo ser redirecionados automaticamente para a rota `/home`.
-- A tela de login deve permanecer acessível enquanto não existir sessão autenticada válida.
-
----
 
 ### RF002 — Login social Google
-
-O sistema deve permitir autenticação utilizando conta Google através do fluxo OAuth2.
-
-- Ao selecionar a opção de login Google o usuário deve ser redirecionado para o fluxo de autenticação do provedor Google.
-- Após autenticação bem-sucedida o sistema deve:
-    - Validar os dados retornados pelo provedor de autenticação.
-    - Criar e persistir sessão autenticada.
-    - Redirecionar o usuário para a rota `/home` .
-- Em caso de cancelamento da autenticação Google o sistema deve:
-    - Interromper o fluxo de autenticação.
-    - Não gerar sessão autenticada.
-    - Manter o usuário na tela de login.
-- Em caso de falha durante autenticação Google o sistema deve:
-    - Impedir criação de sessão autenticada.
-    - Exibir mensagem de erro apropriada.
-    - Permitir nova tentativa de autenticação.
-
----
-
-### RF003 — Formulário de autenticação
-
-- O sistema deve exibir um formulário de autenticação na tela de login contendo:
-    - Campo de e-mail.
-    - Campo de senha.
-    - Botão “Entrar”.
-- O formulário deve permitir autenticação manual utilizando e-mail e senha.
-- Os campos do formulário devem:
-    - Permitir edição pelo usuário.
-    - Possuir identificação visual clara.
-    - Exibir mensagens de erro quando inválidos.
-- O botão “Entrar” deve iniciar o processo de autenticação do usuário.
-
----
-
-### RF004 — Validação de e-mail
-
-- O sistema deve validar o campo de e-mail durante o processo de autenticação.
-- O campo de e-mail deve validar:
-    - Preenchimento obrigatório.
-    - Formato válido de e-mail.
-    - Remoção de espaços inválidos antes e após o conteúdo informado.
-- O sistema não deve permitir autenticação enquanto o campo de e-mail possuir erros de validação.
-
-Mensagens de validação:
-
-`Formato de e-mail inválido.`
-
----
-
-### RF005 — Validação de senha
-
-- O sistema deve validar o campo de senha durante o processo de autenticação.
-- O campo de senha deve validar:
-    - Preenchimento obrigatório
-    - Quantidade mínima de 8 caracteres
-- O sistema não deve permitir autenticação enquanto o campo de senha possuir erros de validação.
-
-Mensagens de validação:
-
-`Senha vazia.`
-
-`A senha deve possuir no mínimo 8 caracteres.`
-
----
-
-### RF006 — Visualização de senha
-
-O sistema deve permitir visualizar e ocultar o conteúdo do campo de senha durante autenticação.
-
----
-
-### RF007 — Controle do botão de login
-
-O botão “Entrar” deve:
-
-- permanecer desabilitado enquanto existirem erros de validação
-- iniciar o processo de autenticação ao ser acionado
-- exibir loading visual durante autenticação
-- permanecer bloqueado até finalização da autenticação
-- retornar ao estado habilitado em caso de falha na autenticação
-
----
-
-### RF008 — Autenticação
-
-Ao realizar autenticação o sistema deve:
-
-- Gerar sessão autenticada.
-- Autenticar apenas usuários com credenciais válidas.
-- Armazenar a sessão autenticada localmente.
-- Redirecionar usuário para rota `/home`.
-- Exibir mensagem de sucesso:
-
-    `“Bem-vindo.”`
-
-
-Em caso de autenticação inválida o sistema deve impedir acesso à aplicação autenticada.
-
----
-
-### RF009 — Tratamento de erro
-
-O sistema deve tratar falhas de autenticação exibindo mensagens apropriadas ao usuário conforme o tipo de erro identificado.
-
-- Mensagem padrão:
-
-`Ops! Não foi possível acessar a aplicação. Tente novamente mais tarde.`
-
-- Em caso de credenciais inválidas o sistema deve exibir:
-
-`E-mail ou senha inválidos.`
-
-- Em caso de falha durante a autenticação o sistema deve:
-    - Impedir acesso a rotas protegidas.
-    - Remover estados de loading da interface.
-    - Reabilitar interação do botão “Entrar”.
-    - Exibir mensagens de erro correspondentes.
-- Em caso de ausência de conexão com internet o sistema deve exibir mensagem informando indisponibilidade de conexão.
+- O sistema deve permitir autenticação utilizando conta Google através do fluxo OAuth2.
 - Em caso de cancelamento da autenticação Google o sistema deve retornar o usuário para a tela de login sem gerar sessão autenticada.
 
----
+### RF003 — Formulário de autenticação
+- O sistema deve exibir campos de e-mail, senha e botão “Entrar”.
+- O formulário deve permitir autenticação manual utilizando e-mail e senha.
+
+### RF004 — Validação de e-mail
+- O sistema deve validar o campo de e-mail durante o processo de autenticação.
+- O sistema não deve permitir autenticação enquanto o campo de e-mail possuir erros de validação.
+
+### RF005 — Validação de senha
+- O sistema deve validar o campo de senha durante o processo de autenticação.
+- O sistema não deve permitir autenticação enquanto o campo de senha possuir erros de validação.
+
+### RF006 — Visualização de senha
+- O sistema deve permitir visualizar e ocultar o conteúdo do campo de senha.
+
+### RF007 — Controle do botão de login
+- O botão “Entrar” deve permanecer desabilitado enquanto os campos obrigatórios estiverem vazios.
+- Exibir indicador de progresso (loading) durante o processo de autenticação.
+
+### RF008 — Autenticação
+- Gerar sessão autenticada para credenciais válidas.
+- Armazenar a sessão autenticada localmente utilizando `Flutter Secure Storage`.
+
+### RF009 — Tratamento de erro
+- Mensagem padrão: `Ops! Não foi possível acessar a aplicação. Tente novamente mais tarde.`
+- Credenciais inválidas: `E-mail ou senha inválidos.`
+- Sem conexão: Exibir mensagem informando indisponibilidade de rede.
 
 ### RF010 — Persistência de sessão
-
-O sistema deve manter a sessão autenticada do usuário entre reinicializações do aplicativo enquanto existir autenticação válida.
-
-Ao iniciar a aplicação o sistema deve:
-
-- verificar existência de sessão autenticada válida através de `checkSession()`
-- restaurar sessão autenticada persistida localmente com `restoreSession()`
-- validar token local utilizando `hasValidSession()`
-- redirecionar usuários autenticados para a rota `/home`
-
-Em caso de sessão inexistente ou inválida o sistema deve redirecionar o usuário para a tela de login.
-
----
+- Verificar existência de sessão válida através de `checkSession()`.
+- Restaurar sessão persistida com `restoreSession()`.
 
 ### RF011 — Validação de sessão
-
-O sistema deve validar se existe uma sessão autenticada válida durante utilização da aplicação.
-
-O sistema deve:
-
-- permitir acesso apenas para usuários autenticados através do estado `isAuthenticated` da ViewModel
-- impedir acesso quando não existir sessão válida
-- redirecionar usuários não autenticados para a tela de login
-
-Em caso de sessão expirada o sistema deve:
-
-- remover autenticação local
-- redirecionar usuário para a tela de login
-- exigir nova autenticação
-
----
+- Permitir acesso apenas para usuários autenticados via estado `isAuthenticated`.
 
 ### RF012 — Logout
-
-O sistema deve permitir encerramento da sessão autenticada do usuário através do método `signOut()`.
-
-Ao realizar logout o sistema deve:
-
-- invalidar sessão autenticada
-- remover tokens armazenados localmente
-- remover dados de autenticação persistidos
-- redirecionar usuário para a tela de login
+- Permitir encerramento da sessão através do método `signOut()`.
 
 ---
 
-## Requisitos não funcionais
+## Regras de Negócio
 
-### RNF001 — Segurança
-
-- O sistema deve utilizar autenticação segura através do protocolo OAuth2.
-- Sessões autenticadas devem ser armazenadas utilizando armazenamento seguro do dispositivo.
-- O sistema deve permitir acesso apenas para usuários autenticados com sessão válida.
-- Tokens e dados de autenticação não devem ser expostos visualmente ao usuário.
-- O sistema deve invalidar sessões autenticadas durante logout.
-- O sistema deve remover dados de autenticação local após encerramento da sessão.
+- **RN001 — Validade da sessão**: Sessões permanecem válidas enquanto existir autenticação ativa no dispositivo.
+- **RN002 — Acesso protegido**: Usuários não autenticados não acessam funcionalidades protegidas.
+- **RN003 — Logout**: O logout limpa obrigatoriamente os tokens locais.
+- **RN004 — Cancelamento Google**: Não gera sessão se o fluxo Google for cancelado.
+- **RN005 — Validação obrigatória**: Autenticação bloqueada se houver erros de validação ativos.
 
 ---
 
-### RNF002 — Persistência
+## Critérios do MVP
 
-- O sistema deve persistir a sessão autenticada do usuário entre reinicializações do aplicativo enquanto existir autenticação válida.
-- Tokens e dados de autenticação devem ser armazenados utilizando armazenamento seguro do dispositivo.
-- O sistema deve armazenar apenas os dados necessários para manutenção da sessão autenticada.
-- Dados de autenticação persistidos devem ser removidos após logout da aplicação.
-
----
-
-### RNF003 — Performance
-
-- As validações dos campos devem ocorrer localmente antes do envio da requisição.
-- O botão de autenticação deve permanecer bloqueado durante o processo de autenticação.
-- O sistema deve permanecer responsivo durante o fluxo de autenticação.
-
----
-
-### RNF004 — Feedback visual
-
-- O sistema deve exibir indicador visual de carregamento durante processos de autenticação.
-- Mensagens de erro e sucesso devem ser apresentadas de forma clara e legível ao usuário.
-- Notificações visuais devem possuir duração aproximada de 2000ms.
-
----
-
-## Regra de negocio
-
-### RN001 — Validade da sessão
-
-- Sessões autenticadas devem permanecer válidas enquanto existir autenticação ativa no dispositivo.
-- Em caso de expiração da sessão o sistema deve exigir nova autenticação do usuário.
-
----
-
-### RN002 — Acesso protegido
-
-- Usuários não autenticados não devem acessar funcionalidades protegidas da aplicação.
-
----
-
-### RN003 — Logout
-
-- Ao realizar logout o sistema deve encerrar a sessão autenticada do usuário.
-
----
-
-### RN004 — Cancelamento de autenticação Google
-
-- O sistema não deve gerar sessão autenticada quando o fluxo de autenticação Google for cancelado pelo usuário.
-
----
-
-### RN005 — Validação obrigatória
-
-- O sistema não deve permitir autenticação enquanto existirem erros de validação nos campos obrigatórios.
+- [x] CRUD de autenticação funcional (E-mail/Senha).
+- [x] Login Social com Google.
+- [x] Persistência de sessão em armazenamento seguro.
+- [x] Tratamento de erros amigável para o usuário.
 
 ---
 
 ## Dependências externas
 
-- Supabase — autenticação, gerenciamento de sessão e persistência de dados do usuário.
-- OAuth 2.0 — autenticação social utilizando provedor Google.
-- Flutter Secure Storage — armazenamento seguro de tokens e dados de autenticação no dispositivo.
-
----
+- **Supabase**: Autenticação e gerenciamento de sessão.
+- **OAuth 2.0**: Fluxo de autenticação social Google.
+- **Flutter Secure Storage**: Armazenamento seguro de tokens.

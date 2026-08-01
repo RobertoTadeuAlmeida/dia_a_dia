@@ -1,4 +1,8 @@
 import 'package:dia_a_dia/core/constants/app_keys.dart';
+import 'package:dia_a_dia/core/routes/app_routes.dart';
+import 'package:dia_a_dia/core/routes/route_names.dart';
+import 'package:dia_a_dia/core/theme/app_theme.dart';
+import 'package:dia_a_dia/core/widgets/primary_button.dart';
 import 'package:dia_a_dia/modules/login/viewmodel/signup_viewmodel.dart';
 import 'package:dia_a_dia/modules/login/view/pages/signup_page.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +51,13 @@ Future<void> _pumpSignUpPage(WidgetTester tester) async {
   await tester.pumpWidget(
     ChangeNotifierProvider<SignUpViewModel>.value(
       value: _viewModel,
-      child: const MaterialApp(home: SignupPage()),
+      child: MaterialApp(
+        title: 'Dia A Dia',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        initialRoute: RouteNames.signup,
+        routes: AppRoutes.routes,
+      ),
     ),
   );
 }
@@ -81,11 +91,6 @@ void main() {
       expect(find.byKey(AppKeys.authCard), findsOneWidget);
     });
 
-    testWidgets('deve exibir o formulário completo', (tester) async {
-
-
-    });
-
     testWidgets('deve exibir o botão Criar Conta', (tester) async {
       await _pumpSignUpPage(tester);
 
@@ -107,7 +112,7 @@ void main() {
     testWidgets('deve exibir o link Fazer Login', (tester) async {
       await _pumpSignUpPage(tester);
 
-      expect(find.byKey(AppKeys.createAccountButton), findsOneWidget);
+      expect(find.byKey(AppKeys.signupLoginLink), findsOneWidget);
     });
   });
 
@@ -116,20 +121,35 @@ void main() {
   //---------------------------------------------------------------------------
 
   group('Campos', () {
-    testWidgets('deve exibir campo Nome', (tester) async {});
+    testWidgets('deve exibir campo Nome', (tester) async {
+      await _pumpSignUpPage(tester);
 
-    testWidgets('deve exibir campo Sobrenome', (tester) async {});
+      expect(find.byKey(AppKeys.signupNameField), findsOneWidget);
+    });
 
-    testWidgets('deve exibir campo E-mail', (tester) async {});
+    testWidgets('deve exibir campo Sobrenome', (tester) async {
+      await _pumpSignUpPage(tester);
 
-    testWidgets('deve exibir campo Senha', (tester) async {});
+      expect(find.byKey(AppKeys.signupLastNameField), findsOneWidget);
+    });
 
-    testWidgets('deve exibir campo Confirmar Senha', (tester) async {});
+    testWidgets('deve exibir campo E-mail', (tester) async {
+      await _pumpSignUpPage(tester);
 
-    testWidgets(
-      'deve enviar o texto digitado para a ViewModel',
-      (tester) async {},
-    );
+      expect(find.byKey(AppKeys.signupEmailField), findsOneWidget);
+    });
+
+    testWidgets('deve exibir campo Senha', (tester) async {
+      await _pumpSignUpPage(tester);
+
+      expect(find.byKey(AppKeys.signupPasswordField), findsOneWidget);
+    });
+
+    testWidgets('deve exibir campo Confirmar Senha', (tester) async {
+      await _pumpSignUpPage(tester);
+
+      expect(find.byKey(AppKeys.signupConfirmPasswordField), findsOneWidget);
+    });
   });
 
   //---------------------------------------------------------------------------
@@ -137,19 +157,53 @@ void main() {
   //---------------------------------------------------------------------------
 
   group('Botão Criar Conta', () {
-    testWidgets('deve iniciar desabilitado', (tester) async {});
+    testWidgets('deve iniciar desabilitado', (tester) async {
+      await _pumpSignUpPage(tester);
 
-    testWidgets(
-      'deve habilitar quando o formulário estiver válido',
-      (tester) async {},
-    );
+      final button = tester.widget<PrimaryButton>(
+        find.byKey(AppKeys.signupButton),
+      );
 
-    testWidgets('deve chamar signUp ao ser pressionado', (tester) async {});
+      expect(button.onPressed, isNull);
+    });
 
-    testWidgets(
-      'deve permanecer desabilitado durante o loading',
-      (tester) async {},
-    );
+    testWidgets('deve habilitar quando o formulário estiver válido', (
+      tester,
+    ) async {
+      when(() => _viewModel.isFormValid).thenReturn(true);
+
+      await _pumpSignUpPage(tester);
+
+      final button = tester.widget<PrimaryButton>(
+        find.byKey(AppKeys.signupButton),
+      );
+
+      expect(button.onPressed, isNotNull);
+    });
+
+    testWidgets('deve chamar signUp ao ser pressionado', (tester) async {
+      _mockSuccessState('cadastro realizado com sucesso.');
+      await _pumpSignUpPage(tester);
+
+      await tester.tap(find.byKey(AppKeys.signupButton));
+      await tester.pump();
+
+      verify(() => _viewModel.signUp()).called(1);
+    });
+
+    testWidgets('deve permanecer desabilitado durante o loading', (
+      tester,
+    ) async {
+      _mockLoadingState();
+
+      await _pumpSignUpPage(tester);
+
+      final button = tester.widget<PrimaryButton>(
+        find.byKey(AppKeys.signupButton),
+      );
+
+      expect(button.onPressed, isNull);
+    });
   });
 
   //---------------------------------------------------------------------------
@@ -157,29 +211,79 @@ void main() {
   //---------------------------------------------------------------------------
 
   group('Estados da Tela', () {
-    testWidgets(
-      'deve exibir indicador de carregamento durante o cadastro',
-      (tester) async {},
-    );
+    testWidgets('deve exibir indicador de carregamento durante o cadastro', (
+      tester,
+    ) async {
+      _mockLoadingState();
+
+      await _pumpSignUpPage(tester);
+
+      expect(find.byKey(AppKeys.primaryButtonLoading), findsOneWidget);
+    });
 
     testWidgets(
-      'deve ocultar indicador quando o cadastro terminar',
-      (tester) async {},
+      'não deve exibir indicador de carregamento quando isLoading for false',
+      (tester) async {
+        await _pumpSignUpPage(tester);
+
+        expect(find.byKey(AppKeys.primaryButtonLoading), findsNothing);
+      },
     );
 
-    testWidgets(
-      'deve exibir mensagem de erro quando houver falha',
-      (tester) async {},
-    );
+    testWidgets('deve exibir erro quando o e-mail já estiver cadastrado', (
+      tester,
+    ) async {
+      _mockErrorState('Este e-mail já está cadastrado.');
 
-    testWidgets(
-      'deve remover mensagem de erro após novo sucesso',
-      (tester) async {},
-    );
+      await _pumpSignUpPage(tester);
+
+      expect(find.byKey(AppKeys.errorMessage), findsOneWidget);
+      expect(find.text('Este e-mail já está cadastrado.'), findsOneWidget);
+    });
+
+    testWidgets('deve exibir erro quando não houver conexão', (tester) async {
+      const message =
+          'Sem conexão com a internet. Verifique sua rede e tente novamente.';
+      _mockErrorState(message);
+
+      await _pumpSignUpPage(tester);
+
+      expect(find.byKey(AppKeys.errorMessage), findsOneWidget);
+      expect(find.text(message), findsOneWidget);
+    });
+
+    testWidgets('deve exibir erro genérico quando ocorrer falha inesperada', (
+      tester,
+    ) async {
+      const message =
+          'Ops! Não foi possível concluir o cadastro. Tente novamente mais tarde.';
+
+      _mockErrorState(message);
+
+      await _pumpSignUpPage(tester);
+
+      expect(find.byKey(AppKeys.errorMessage), findsOneWidget);
+      expect(find.text(message), findsOneWidget);
+    });
+
+    testWidgets('não deve exibir ErrorMessage quando não houver erro', (
+      tester,
+    ) async {
+      await _pumpSignUpPage(tester);
+
+      expect(find.byKey(AppKeys.errorMessage), findsNothing);
+    });
 
     testWidgets(
       'deve exibir mensagem de sucesso quando cadastro for concluído',
-      (tester) async {},
+      (tester) async {
+        _mockSuccessState('Cadastro realizado com sucesso.');
+
+        await _pumpSignUpPage(tester);
+
+        expect(find.byKey(AppKeys.successMessage), findsOneWidget);
+        expect(find.text('Cadastro realizado com sucesso.'), findsOneWidget);
+      },
     );
   });
 
@@ -188,21 +292,77 @@ void main() {
   //---------------------------------------------------------------------------
 
   group('Senha', () {
-    testWidgets('deve ocultar senha inicialmente', (tester) async {});
+    testWidgets('deve ocultar senha inicialmente', (tester) async {
+      await _pumpSignUpPage(tester);
+
+      final passwordField = tester.widget<TextFormField>(
+        find.byKey(AppKeys.signupPasswordField),
+      );
+
+      expect(passwordField.obscureText, isTrue);
+    });
+
+    testWidgets('deve mostrar senha ao tocar no ícone de visualização', (
+      tester,
+    ) async {
+      await _pumpSignUpPage(tester);
+
+      await tester.tap(find.byKey(AppKeys.authTextFieldPasswordToggle));
+      await tester.pump();
+
+      final passwordField = tester.widget<TextFormField>(
+        find.byKey(AppKeys.signupPasswordField),
+      );
+
+      expect(passwordField.obscureText, isFalse);
+    });
+
+    testWidgets('deve ocultar novamente ao tocar pela segunda vez', (
+      tester,
+    ) async {
+      await _pumpSignUpPage(tester);
+
+      await tester.tap(find.byKey(AppKeys.authTextFieldPasswordToggle));
+      await tester.pump();
+
+      await tester.tap(find.byKey(AppKeys.authTextFieldPasswordToggle));
+      await tester.pump();
+
+      final passwordField = tester.widget<TextFormField>(
+        find.byKey(AppKeys.signupPasswordField),
+      );
+
+      expect(passwordField.obscureText, isTrue);
+    });
 
     testWidgets(
-      'deve mostrar senha ao tocar no ícone de visualização',
-      (tester) async {},
-    );
+      'não deve alterar o texto digitado ao mostrar ou ocultar a senha',
+      (tester) async {
+        await _pumpSignUpPage(tester);
 
-    testWidgets(
-      'deve ocultar novamente ao tocar pela segunda vez',
-      (tester) async {},
-    );
+        await tester.enterText(
+          find.byKey(AppKeys.signupPasswordField),
+          'senha123',
+        );
+        await tester.pump();
 
-    testWidgets(
-      'deve aplicar o mesmo comportamento na confirmação de senha',
-      (tester) async {},
+        final passwordFieldBefore = tester.widget<TextFormField>(
+          find.byKey(AppKeys.signupPasswordField),
+        );
+
+        expect(passwordFieldBefore.obscureText, isTrue);
+
+        await tester.tap(find.byKey(AppKeys.authTextFieldPasswordToggle));
+        await tester.pump();
+
+        final passwordFieldAfter = tester.widget<TextFormField>(
+          find.byKey(AppKeys.signupPasswordField),
+        );
+
+        expect(passwordFieldAfter.obscureText, isFalse);
+
+        expect(passwordFieldAfter.controller?.text, 'senha123');
+      },
     );
   });
 
@@ -211,20 +371,37 @@ void main() {
   //---------------------------------------------------------------------------
 
   group('Navegação', () {
-    testWidgets(
-      'deve retornar para Login ao pressionar Voltar',
-      (tester) async {},
-    );
+    testWidgets('deve retornar para Login ao pressionar Voltar', (
+      tester,
+    ) async {
+      await _pumpSignUpPage(tester);
 
-    testWidgets(
-      'deve navegar para Login ao tocar em Fazer Login',
-      (tester) async {},
-    );
+      await tester.tap(find.byKey(AppKeys.signupBackButton));
+      await tester.pumpAndSettle();
 
-    testWidgets(
-      'deve navegar para Home após cadastro concluído',
-      (tester) async {},
-    );
+      expect(find.byKey(AppKeys.loginPage), findsOneWidget);
+    });
+
+    testWidgets('deve navegar para Login ao tocar em Fazer Login', (
+      tester,
+    ) async {
+      await _pumpSignUpPage(tester);
+
+      await tester.tap(find.byKey(AppKeys.signupLoginLink));
+      await tester.pump();
+
+      expect(find.byKey(AppKeys.loginPage), findsOneWidget);
+    });
+
+    testWidgets('deve navegar para Home após cadastro concluído', (
+      tester,
+    ) async {
+      _mockSuccessState('Cadastro realizado com sucesso.');
+
+      await _pumpSignUpPage(tester);
+
+      expect(find.byKey(AppKeys.homePage), findsOneWidget);
+    });
   });
 
   //---------------------------------------------------------------------------
@@ -232,7 +409,11 @@ void main() {
   //---------------------------------------------------------------------------
 
   group('Google', () {
-    testWidgets('deve exibir botão Continuar com Google', (tester) async {});
+    testWidgets('deve exibir botão Continuar com Google', (tester) async {
+      await _pumpSignUpPage(tester);
+
+      expect(find.byKey(AppKeys.socialLoginButton), findsOneWidget);
+    });
 
     testWidgets(
       'deve chamar signUpWithGoogle ao tocar no botão',
@@ -241,16 +422,17 @@ void main() {
   });
 
   //---------------------------------------------------------------------------
-  // RESPONSABILIDADE: Acessibilidade
+  // RESPONSABILIDADE: Layout Responsivo
   //---------------------------------------------------------------------------
 
-  group('Acessibilidade', () {
-    testWidgets(
-      'deve permitir rolagem quando o teclado estiver aberto',
-      (tester) async {},
-    );
+  group('Layout Responsivo', () {
+    testWidgets('deve utilizar SingleChildScrollView para permitir rolagem', (
+      tester,
+    ) async {
+      await _pumpSignUpPage(tester);
 
-    testWidgets('deve possuir labels acessíveis nos campos', (tester) async {});
+      expect(find.byType(SingleChildScrollView), findsOneWidget);
+    });
   });
 
   //---------------------------------------------------------------------------
@@ -259,7 +441,15 @@ void main() {
   group('Ciclo de Vida', () {
     testWidgets(
       'não deve lançar exceções ao remover a tela durante o carregamento',
-      (tester) async {},
+      (tester) async {
+        _mockLoadingState();
+
+        await _pumpSignUpPage(tester);
+
+        await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+
+        expect(tester.takeException(), isNull);
+      },
     );
   });
 }

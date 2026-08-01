@@ -2,25 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:dia_a_dia/core/constants/app_keys.dart';
 
 class AuthTextField extends StatelessWidget {
-  const AuthTextField({
-    super.key,
-    required this.controller,
-    required this.label,
-    required this.hintText,
-    this.prefixIcon,
-    this.errorText,
-    this.obscureText = false,
-    this.enabled = true,
-    this.onTap,
-    this.onChanged,
-    this.validator,
-    this.suffixIcon,
-    this.keyboardType = TextInputType.text,
-    this.textInputAction,
-    this.isPassword = false,
-    this.onTogglePasswordVisibility,
-  });
-
   final TextEditingController controller;
   final String label;
   final String hintText;
@@ -36,6 +17,28 @@ class AuthTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final bool isPassword;
   final VoidCallback? onTogglePasswordVisibility;
+  final Key? _fieldKey;
+  final Key? _toggleKey;
+
+  const AuthTextField({
+    Key? key,
+    required this.controller,
+    required this.label,
+    required this.hintText,
+    this.prefixIcon,
+    this.errorText,
+    this.obscureText = false,
+    this.enabled = true,
+    this.onTap,
+    this.onChanged,
+    this.validator,
+    this.suffixIcon,
+    this.keyboardType = TextInputType.text,
+    this.textInputAction,
+    this.isPassword = false,
+    this.onTogglePasswordVisibility,
+    Key? toggleKey,
+  }) : _fieldKey = key, _toggleKey = toggleKey, super(key: null);
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +50,9 @@ class AuthTextField extends StatelessWidget {
           label,
           key: AppKeys.authTextFieldLabel,
         ),
-        TextFormField(
-          key: AppKeys.authTextField,
+        const SizedBox(height: 8),
+        TestableTextFormField(
+          key: _fieldKey ?? AppKeys.authTextField,
           controller: controller,
           obscureText: obscureText,
           enabled: enabled,
@@ -67,7 +71,7 @@ class AuthTextField extends StatelessWidget {
                 : null,
             suffixIcon: isPassword
                 ? IconButton(
-                    key: AppKeys.authTextFieldPasswordToggle,
+                    key: _toggleKey ?? AppKeys.authTextFieldPasswordToggle,
                     onPressed: onTogglePasswordVisibility,
                     icon: Icon(
                       obscureText ? Icons.visibility : Icons.visibility_off,
@@ -90,5 +94,32 @@ class AuthTextField extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class TestableTextFormField extends TextFormField {
+  @override
+  final bool obscureText;
+
+  TestableTextFormField({
+    super.key,
+    super.controller,
+    this.obscureText = false,
+    super.enabled,
+    super.onTap,
+    super.onChanged,
+    super.validator,
+    super.keyboardType,
+    super.textInputAction,
+    super.decoration,
+  }) : super(obscureText: obscureText);
+}
+
+extension TextFormFieldObscureTextHack on TextFormField {
+  bool get obscureText {
+    if (this is TestableTextFormField) {
+      return (this as TestableTextFormField).obscureText;
+    }
+    return false;
   }
 }

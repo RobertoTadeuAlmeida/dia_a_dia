@@ -2,6 +2,8 @@
 .*
 !.gitignore
 !.metadata
+.senhaSB.txt
+.prompt.md
 
 # Miscellaneous
 *.class

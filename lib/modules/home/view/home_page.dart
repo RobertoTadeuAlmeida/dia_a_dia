@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:dia_a_dia/core/constants/app_keys.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../login/view/pages/login_page.dart';
 import '../../login/viewmodel/auth_viewmodel.dart';
@@ -26,8 +26,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    print(Supabase.instance.client.auth.currentSession);
     return Scaffold(
+      key: AppKeys.homePage,
       backgroundColor: const Color(0xFFF5F7FB),
 
       // SafeArea evita que o conteúdo fique atrás
