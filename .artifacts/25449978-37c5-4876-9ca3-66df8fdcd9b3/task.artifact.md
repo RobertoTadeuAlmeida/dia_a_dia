@@ -1,0 +1,8 @@
+- [x] Criar widget `SuccessMessage` em `lib/core/widgets/success_message.dart`
+- [/] Implementar `SignupPage` em `lib/modules/login/view/pages/signup_page.dart`
+    - [ ] Adicionar controllers e listeners
+    - [ ] Montar estrutura visual com `AppKeys`
+    - [ ] Integrar com `SignUpViewModel`
+    - [ ] Implementar navegação de sucesso e retorno
+- [ ] Executar testes: `flutter test test/modules/login/view/pages/signup_page_test.dart`
+- [ ] Verificar estado GREEN

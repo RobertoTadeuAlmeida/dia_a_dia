@@ -1,3 +1,10 @@
+# Private dotfiles and directories
+.*
+!.gitignore
+!.metadata
+.senhaSB.txt
+.prompt.md
+
 # Miscellaneous
 *.class
 *.log
