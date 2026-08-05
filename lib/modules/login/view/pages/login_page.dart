@@ -118,13 +118,20 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 28),
                 GestureDetector(
                   key: AppKeys.createAccountButton,
+                  behavior: HitTestBehavior.opaque,
                   onTap: () =>
                       Navigator.of(context).pushNamed(RouteNames.signup),
-                  child: Text(
-                    'Criar conta',
-                    style: TextStyle(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 24,
+                    ),
+                    child: Text(
+                      'Criar conta',
+                      style: TextStyle(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -136,15 +143,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _handleError(AuthViewModel authViewModel) {
-    if (!mounted) return;
-    if (authViewModel.errorMessage != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(authViewModel.errorMessage!)));
-      authViewModel.clearError();
-    }
-  }
 
   Future<void> _handleSignIn() async {
     if (formKey.currentState?.validate() ?? false) {

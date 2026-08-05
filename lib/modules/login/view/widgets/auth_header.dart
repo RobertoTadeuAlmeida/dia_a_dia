@@ -1,4 +1,5 @@
 import 'package:dia_a_dia/core/constants/app_keys.dart';
+import 'package:dia_a_dia/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class AuthHeader extends StatelessWidget {
@@ -37,7 +38,7 @@ class AuthHeader extends StatelessWidget {
           'Seu dia mais organizado',
           key: AppKeys.authSubtitle,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: AppColors.textSecondaryLight,
           ),
         ),
       ],

@@ -59,9 +59,9 @@ O projeto encontra-se atualmente em fase de **MVP (Minimum Viable Product)**. As
 Nossa documentação é organizada para facilitar tanto o entendimento do produto quanto a manutenção técnica.
 
 ### 🎨 Design e Identidade
-- [Paleta de Cores](docs/designer/ui/paleta_cores.md)
-- [Tipografia](docs/designer/brand/tipografia.md)
-- [Logo e Branding](docs/designer/ui/logo.md)
+- [Paleta de Cores](docs/design/ui/paleta_cores.md)
+- [Tipografia](docs/design/brand/tipografia.md)
+- [Logo e Branding](docs/design/ui/logo.md)
 
 ### ⚙️ Desenvolvimento
 - [Padrões de Código (Coding Standards)](docs/coding_standards.md)
