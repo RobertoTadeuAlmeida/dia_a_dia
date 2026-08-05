@@ -12,4 +12,3 @@ abstract final class AppRoutes {
     RouteNames.home: (_) => const HomePage(),
   };
 }
-

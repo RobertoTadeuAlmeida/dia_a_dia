@@ -25,10 +25,10 @@ class PrimaryButton extends StatelessWidget {
 
     final bgColor = _isDisabled
         ? (isDark ? AppColors.dividerDark : AppColors.dividerLight)
-        : (isDark ? AppColors.actionDark  : AppColors.actionLight);
+        : (isDark ? AppColors.actionDark : AppColors.actionLight);
 
     final fgColor = _isDisabled
-        ? (isDark ? AppColors.textMutedDark  : AppColors.textMutedLight)
+        ? (isDark ? AppColors.textMutedDark : AppColors.textPrimaryLight)
         : (isDark ? AppColors.backgroundDark : Colors.white);
 
     return SizedBox(
@@ -51,28 +51,28 @@ class PrimaryButton extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           child: isLoading
               ? SizedBox(
-            key: AppKeys.primaryButtonLoading,
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: fgColor,
-            ),
-          )
+                  key: AppKeys.primaryButtonLoading,
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: fgColor,
+                  ),
+                )
               : Row(
-            key: const ValueKey('label'),
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 18),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                text,
-                style: AppTextStyles.labelLarge.copyWith(color: fgColor),
-              ),
-            ],
-          ),
+                  key: const ValueKey('label'),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, size: 18),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      text,
+                      style: AppTextStyles.label.copyWith(color: fgColor),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

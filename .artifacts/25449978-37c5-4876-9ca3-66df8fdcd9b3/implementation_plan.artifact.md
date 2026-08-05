@@ -1,47 +1,51 @@
-# Plano de Implementação - SignupPage (Estado Green)
+# Plano de Refatoração do README.md — Projeto Dia A Dia
 
-O objetivo é implementar a `SignupPage` para satisfazer todos os testes em `signup_page_test.dart`, seguindo os padrões MVVM e a arquitetura do projeto.
+Este plano detalha a reestruturação do `README.md` raiz para torná-lo uma porta de entrada profissional, organizada e informativa, baseada inteiramente no estado real do projeto.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - Criarei o widget `SuccessMessage` em `lib/core/widgets/success_message.dart`, seguindo o padrão do `ErrorMessage`.
-> - A `SignupPage` será implementada com controladores para todos os campos e reagirá aos estados de erro e sucesso da `SignUpViewModel`.
-> - Utilizarei `AppKeys` para garantir que os testes localizem os widgets corretamente.
+> O status das funcionalidades e as tecnologias foram validados diretamente no código e diretórios do projeto:
+> - **Módulos Task e Weather**: Possuem estrutura de pastas, mas ViewModels vazias. Estão marcados corretamente como "Planejado" ou "Em desenvolvimento".
+> - **Módulo Home**: Contém apenas interface visual sem lógica. Marcado como "Em desenvolvimento".
+> - **Autenticação e Cadastro**: Totalmente implementados e integrados com Supabase.
+> - **Licença**: Confirmada como MIT no arquivo `LICENSE`.
 
 ## Mudanças Propostas
 
-### Core Widgets
+### [Geral: Apresentação Visual]
 
-#### [NEW] [success_message.dart](file:///home/rtadeu/Dev/FlutterProject/dia_a_dia/lib/core/widgets/success_message.dart)
-- Implementar `SuccessMessage` similar ao `ErrorMessage`.
-- Utilizar `AppKeys.successMessage`, `AppKeys.successMessageIcon` e `AppKeys.successMessageText`.
-- Usar `Icons.check_circle_outline`.
+#### [MODIFY] [README.md](file:///home/rtadeu/Dev/FlutterProject/dia_a_dia/README.md)
 
-### Módulo de Login
+1.  **Header Profissional**:
+    - Centralizar o título e o slogan: **Seu dia mais organizado**.
+    - Organizar badges existentes: Flutter, Dart, Supabase, License.
+2.  **Sobre o Projeto**:
+    - Explicar o Dia A Dia como um organizador de rotina inteligente com integração climática.
+3.  **Funcionalidades**:
+    - [x] Autenticação segura (E-mail/Senha e Google via Supabase).
+    - [x] Cadastro de novos usuários.
+    - [x] Gestão de sessão com armazenamento seguro.
+    - [ ] Dashboard principal (Interface visual em andamento).
+    - [ ] Gerenciamento de tarefas (Planejado).
+    - [ ] Integração com clima (Planejado).
+4.  **Tecnologias**:
+    - Flutter, Dart, Supabase, Provider, Flutter Secure Storage, Google Fonts, Mocktail.
+5.  **Status**:
+    - Projeto em fase de MVP (Minimum Viable Product) com desenvolvimento incremental.
+6.  **Documentação**:
+    - **Design**: Paleta de Cores, Tipografia, Logo (Links para `docs/designer/`).
+    - **Funcionalidades**: Auth, Signup (Links para `docs/features/`).
+    - **Desenvolvimento**: Padrões de Código (Link para `docs/coding_standards.md`).
+7.  **Como Executar**:
+    - `flutter pub get`, configuração do Supabase, `flutter run`.
+8.  **Testes**:
+    - Instrução `flutter test`.
+9.  **Licença**:
+    - MIT (Link para [LICENSE](file:///home/rtadeu/Dev/FlutterProject/dia_a_dia/LICENSE)).
 
-#### [MODIFY] [signup_page.dart](file:///home/rtadeu/Dev/FlutterProject/dia_a_dia/lib/modules/login/view/pages/signup_page.dart)
-- Implementar `_SignupPageState` com:
-    - `TextEditingController` para Nome, Sobrenome, E-mail, Senha e Confirmação.
-    - Estados booleanos para visibilidade de senha e confirmação.
-- Estrutura do `build`:
-    - `Scaffold` com `AppKeys.signupPage`.
-    - `AppBar` com `signupBackButton`.
-    - `SingleChildScrollView` para evitar overflow.
-    - `AuthHeader` com `AppKeys.authHeader`.
-    - `AuthCard` com `AppKeys.authCard`.
-    - `AuthTextField` para cada campo com suas respectivas `AppKeys`.
-    - `PrimaryButton` para "Criar Conta" com `AppKeys.signupButton`.
-    - `OrDivider` e `SocialLoginButton`.
-    - `ErrorMessage` e `SuccessMessage`.
-    - Link "Fazer Login" com `AppKeys.signupLoginLink`.
-- Lógica:
-    - Atualizar ViewModel no `onChanged` de cada campo.
-    - Navegar para `RouteNames.home` ao detectar sucesso.
-    - Navegar para `RouteNames.login` no botão voltar ou link de login.
+## Verificação Plan
 
-## Plano de Verificação
-
-### Testes Automatizados
-- Executar `flutter test test/modules/login/view/pages/signup_page_test.dart`.
-- Garantir que todos os 25 testes passem.
+### Manual Verification
+- Validar se todos os links relativos funcionam.
+- Confirmar a renderização correta do Markdown (Português Brasileiro).

@@ -55,14 +55,10 @@ class _HomePageState extends State<HomePage> {
 
               const Text(
                 'Seu dia mais organizado',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black54,
-                ),
+                style: TextStyle(fontSize: 18, color: Colors.black54),
               ),
 
               const SizedBox(height: 24),
-
 
               // ==========================================================
               // CARD DE CLIMA
@@ -73,10 +69,7 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF5B9DFF),
-                      Color(0xFF6366F1),
-                    ],
+                    colors: [Color(0xFF5B9DFF), Color(0xFF6366F1)],
                   ),
                 ),
                 child: Column(
@@ -84,10 +77,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     const Text(
                       'São Paulo',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
                     ),
 
                     const SizedBox(height: 24),
@@ -139,10 +129,7 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(width: 8),
                         Text(
                           'Chance de chuva: 15%',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 15,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 15),
                         ),
                       ],
                     ),
@@ -241,9 +228,7 @@ class _HomePageState extends State<HomePage> {
 
                     const Text(
                       '0 de 0 tarefas concluídas',
-                      style: TextStyle(
-                        color: Colors.black54,
-                      ),
+                      style: TextStyle(color: Colors.black54),
                     ),
                   ],
                 ),
@@ -256,10 +241,7 @@ class _HomePageState extends State<HomePage> {
               // ==========================================================
               const Text(
                 'Próximas Tarefas',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
               ),
 
               const SizedBox(height: 16),
@@ -281,17 +263,12 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Text(
                           'Nenhuma tarefa pendente',
-                          style: TextStyle(
-                            fontSize: 22,
-                            color: Colors.black54,
-                          ),
+                          style: TextStyle(fontSize: 22, color: Colors.black54),
                         ),
                         SizedBox(height: 16),
                         Text(
                           'Toque no + para criar',
-                          style: TextStyle(
-                            color: Colors.black45,
-                          ),
+                          style: TextStyle(color: Colors.black45),
                         ),
                       ],
                     ),
@@ -302,15 +279,16 @@ class _HomePageState extends State<HomePage> {
                     right: 16,
                     bottom: 16,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(80, 40),
+                      ),
                       onPressed: () async {
                         await context.read<AuthViewModel>().signOut();
 
                         if (!mounted) return;
 
                         Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (_) => const LoginPage(),
-                          ),
+                          MaterialPageRoute(builder: (_) => const LoginPage()),
                         );
                       },
                       child: const Text('Sair'),
@@ -385,29 +363,18 @@ class _StatisticCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: iconColor,
-          ),
+          Icon(icon, color: iconColor),
 
           const Spacer(),
 
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 8),
 
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.black54,
-            ),
-          ),
+          Text(label, style: const TextStyle(color: Colors.black54)),
         ],
       ),
     );

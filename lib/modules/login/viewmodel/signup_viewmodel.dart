@@ -5,7 +5,8 @@ class SignUpViewModel extends ChangeNotifier {
   final AuthRepository _repository;
   bool _isDisposed = false;
 
-  SignUpViewModel({required AuthRepository repository}) : _repository = repository;
+  SignUpViewModel({required AuthRepository repository})
+    : _repository = repository;
 
   @override
   void dispose() {
@@ -91,7 +92,8 @@ class SignUpViewModel extends ChangeNotifier {
     _validatePassword();
     _validateConfirmPassword();
 
-    _isFormValid = _nameError == null &&
+    _isFormValid =
+        _nameError == null &&
         _lastNameError == null &&
         _emailError == null &&
         _passwordError == null &&
@@ -135,7 +137,8 @@ class SignUpViewModel extends ChangeNotifier {
       _emailError = 'E-mail obrigatório.';
     } else {
       final emailUri = Uri.tryParse('mailto:$trimmed');
-      final bool isValid = emailUri != null &&
+      final bool isValid =
+          emailUri != null &&
           emailUri.path == trimmed &&
           trimmed.contains('@') &&
           trimmed.split('@').last.contains('.');
