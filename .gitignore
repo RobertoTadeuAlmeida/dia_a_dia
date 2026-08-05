@@ -4,6 +4,7 @@
 !.metadata
 .senhaSB.txt
 .prompt.md
+.artifacts/
 
 # Miscellaneous
 *.class
