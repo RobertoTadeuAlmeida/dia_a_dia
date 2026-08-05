@@ -35,9 +35,9 @@ LoginPage (Scaffold)
 ```
 
 ## Componentes Reutilizáveis
-- **AuthHeader**: Exibe a logo (`AppLogo`) e os textos de boas-vindas.
-- **AuthTextField**: Campo customizado com suporte a prefix icon e validação visual.
-- **PrimaryButton**: Botão com suporte a estado de `loading` (exibe CircularProgressIndicator).
+- **AuthHeader**: Exibe a logo (`AppLogo`) e os títulos de boas-vindas utilizando a tipografia oficial **Manrope**.
+- **AuthTextField**: Campo customizado com **labels fixas** acima do input (melhor usabilidade que labels flutuantes), suporte a prefix icon e validação visual integrada.
+- **PrimaryButton**: Botão com suporte a estado de `loading` (exibe CircularProgressIndicator) e cores vinculadas à identidade visual.
 - **SocialLoginButton**: Botão estilizado seguindo as diretrizes do Google.
 
 ## AppKeys Relevantes
@@ -60,11 +60,11 @@ Acionado ao clicar em "Entrar" ou no botão do Google.
 - Interações com os campos são bloqueadas.
 
 ### Error
-Exibe o widget `ErrorMessage` com o feedback retornado pela ViewModel.
+As mensagens de erro são centralizadas no widget `ErrorMessage`, exibido logo abaixo do formulário de login. Isso evita redundâncias visuais (como Snackbars) e mantém o foco do usuário no fluxo da tela.
 
 ## Navegação Visual
-- O clique em "Criar conta" aciona o `RouteNames.signup`.
-- O sucesso na autenticação aciona o `RouteNames.home`.
+- **Criar conta**: Link com área de toque expandida (44x44px) para melhor usabilidade mobile, acionando o `RouteNames.signup`.
+- **Sucesso**: O sucesso na autenticação aciona o `RouteNames.home`.
 
 ## Testes de Widget
 A tela possui cobertura para:
