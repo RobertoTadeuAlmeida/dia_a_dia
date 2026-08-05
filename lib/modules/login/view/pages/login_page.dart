@@ -59,60 +59,77 @@ class _LoginPageState extends State<LoginPage> {
 
     if (authViewModel.isAuthenticated) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pushReplacementNamed(RouteNames.home);
+        if (mounted)
+          Navigator.of(context).pushReplacementNamed(RouteNames.home);
       });
       return const Scaffold(key: AppKeys.homePage, body: SizedBox());
     }
 
+    final theme = Theme.of(context);
+
     return Scaffold(
+      bottomSheet: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        color: Colors.transparent,
+        child: Text(
+          "© 2026 Dia A Dia. Organize sua rotina.",
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall,
+        ),
+      ),
       key: AppKeys.loginPage,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 56),
-              const AuthHeader(),
-              const SizedBox(height: 40),
-              Form(
-                key: formKey,
-                child: ListenableBuilder(
-                  listenable: Listenable.merge([emailController, passwordController]),
-                  builder: (context, _) {
-                    final bool isEnabled = emailController.text.trim().isNotEmpty && 
-                                         passwordController.text.trim().isNotEmpty;
-                    return LoginCard(
-                      emailController: emailController,
-                      passwordController: passwordController,
-                      emailValidator: LoginValidators.email,
-                      passwordValidator: LoginValidators.password,
-                      obscurePassword: obscurePassword,
-                      onTogglePassword: togglePasswordVisibility,
-                      isLoading: isLoading,
-                      onSignIn: isEnabled ? _handleSignIn : null,
-                      onGoogleSignIn: _handleGoogleSignIn,
-                    );
-                  }
-                ),
-              ),
-              const SizedBox(height: 16),
-              ErrorMessage(message: authViewModel!.errorMessage),
-              const SizedBox(height: 28),
-              GestureDetector(
-                key: AppKeys.createAccountButton,
-                onTap: () => Navigator.of(context).pushNamed(RouteNames.signup),
-                child: const Text(
-                  'Criar conta',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
+      body: Center(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                const AuthHeader(),
+                const SizedBox(height: 16),
+                Form(
+                  key: formKey,
+                  child: ListenableBuilder(
+                    listenable: Listenable.merge([
+                      emailController,
+                      passwordController,
+                    ]),
+                    builder: (context, _) {
+                      final bool isEnabled =
+                          emailController.text.trim().isNotEmpty &&
+                          passwordController.text.trim().isNotEmpty;
+                      return LoginCard(
+                        emailController: emailController,
+                        passwordController: passwordController,
+                        emailValidator: LoginValidators.email,
+                        passwordValidator: LoginValidators.password,
+                        obscurePassword: obscurePassword,
+                        onTogglePassword: togglePasswordVisibility,
+                        isLoading: isLoading,
+                        onSignIn: isEnabled ? _handleSignIn : null,
+                        onGoogleSignIn: _handleGoogleSignIn,
+                      );
+                    },
                   ),
                 ),
-              ),
-              const SizedBox(height: 40),
-              const Text('© 2026 Dia A Dia. Organize sua rotina.'),
-              const SizedBox(height: 24),
-            ],
+                const SizedBox(height: 16),
+                ErrorMessage(message: authViewModel.errorMessage),
+                const SizedBox(height: 28),
+                GestureDetector(
+                  key: AppKeys.createAccountButton,
+                  onTap: () =>
+                      Navigator.of(context).pushNamed(RouteNames.signup),
+                  child: Text(
+                    'Criar conta',
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -122,9 +139,9 @@ class _LoginPageState extends State<LoginPage> {
   void _handleError(AuthViewModel authViewModel) {
     if (!mounted) return;
     if (authViewModel.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authViewModel.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(authViewModel.errorMessage!)));
       authViewModel.clearError();
     }
   }
@@ -132,9 +149,9 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleSignIn() async {
     if (formKey.currentState?.validate() ?? false) {
       await context.read<AuthViewModel>().signInWithEmailAndPassword(
-            emailController.text.trim(),
-            passwordController.text,
-          );
+        emailController.text.trim(),
+        passwordController.text,
+      );
     }
   }
 

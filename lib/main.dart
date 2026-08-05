@@ -1,5 +1,6 @@
 import 'package:dia_a_dia/modules/login/repositories/auth_repository.dart';
 import 'package:dia_a_dia/modules/login/viewmodel/auth_viewmodel.dart';
+import 'package:dia_a_dia/modules/login/viewmodel/signup_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +10,6 @@ import 'core/config/supabase_config.dart';
 import 'core/routes/app_routes.dart';
 import 'core/routes/route_names.dart';
 import 'core/theme/app_theme.dart';
-import 'modules/login/view/pages/login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,19 +18,20 @@ void main() async {
     url: SupabaseConfig.url,
     publishableKey: SupabaseConfig.publishableKey,
   );
-  const secureStorage = FlutterSecureStorage();
-  final supabaseClient = Supabase.instance.client;
+
+  final authRepository = AuthRepository(
+    supabaseClient: Supabase.instance.client,
+    secureStorage: const FlutterSecureStorage(),
+  );
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AuthViewModel(
-            repository: AuthRepository(
-              supabaseClient: supabaseClient,
-              secureStorage: secureStorage,
-            ),
-          ),
+          create: (_) => AuthViewModel(repository: authRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SignUpViewModel(repository: authRepository),
         ),
       ],
       child: const DiaADiaApp(),

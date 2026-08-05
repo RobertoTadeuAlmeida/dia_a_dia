@@ -4,22 +4,13 @@ import 'package:dia_a_dia/core/constants/app_keys.dart';
 class SuccessMessage extends StatelessWidget {
   final String? message;
 
-  const SuccessMessage._({
-    super.key,
-    required this.message,
-  });
+  const SuccessMessage._({super.key, required this.message});
 
-  factory SuccessMessage({
-    Key? key,
-    required String? message,
-  }) {
+  factory SuccessMessage({Key? key, required String? message}) {
     if (message == null || message.isEmpty) {
       return const _SuccessMessageHidden();
     }
-    return SuccessMessage._(
-      key: key,
-      message: message,
-    );
+    return SuccessMessage._(key: key, message: message);
   }
 
   @override
@@ -36,12 +27,7 @@ class SuccessMessage extends StatelessWidget {
             color: Colors.green,
           ),
           const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              message!,
-              key: AppKeys.successMessageText,
-            ),
-          ),
+          Flexible(child: Text(message!, key: AppKeys.successMessageText)),
         ],
       ),
     );

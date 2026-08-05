@@ -2,21 +2,13 @@ import 'package:dia_a_dia/modules/login/view/widgets/auth_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> _pumpAuthCard(
-    WidgetTester tester, {
-      Widget? child,
-    }) async {
+Future<void> _pumpAuthCard(WidgetTester tester, {Widget? child}) async {
   await tester.pumpWidget(
     MaterialApp(
-      home: Scaffold(
-        body: AuthCard(
-          child: child ?? const Text('Conteúdo'),
-        ),
-      ),
+      home: Scaffold(body: AuthCard(child: child ?? const Text('Conteúdo'))),
     ),
   );
 }
-
 
 void main() {
   //===========================================================================
@@ -31,21 +23,15 @@ void main() {
     });
 
     testWidgets('deve renderizar o conteúdo filho', (tester) async {
-      await _pumpAuthCard(
-        tester,
-        child: const Text('Meu Conteúdo'),
-      );
+      await _pumpAuthCard(tester, child: const Text('Meu Conteúdo'));
 
       expect(find.text('Meu Conteúdo'), findsOneWidget);
     });
 
     testWidgets('deve permitir renderizar qualquer Widget como filho', (
-        tester,
-        ) async {
-      await _pumpAuthCard(
-        tester,
-        child: const Icon(Icons.person),
-      );
+      tester,
+    ) async {
+      await _pumpAuthCard(tester, child: const Icon(Icons.person));
 
       expect(find.byIcon(Icons.person), findsOneWidget);
     });

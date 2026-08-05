@@ -1,573 +1,93 @@
-# Coding Standards
+# Coding Standards — Dia A Dia
 
-> Projeto: **Dia A Dia**
->
-> Este documento define os padrões obrigatórios de desenvolvimento utilizados em todo o projeto.
->
-> Todo código produzido manualmente ou por Inteligência Artificial deve seguir rigorosamente estas diretrizes.
+Este documento define as diretrizes técnicas e padrões de desenvolvimento do projeto **Dia A Dia**. O objetivo é garantir consistência, legibilidade e facilidade de manutenção por desenvolvedores e ferramentas de IA.
 
----
+## Arquitetura
 
-# Objetivos
+O projeto utiliza o padrão **MVVM (Model-View-ViewModel)** aliado ao **Repository Pattern**.
 
-Todo código deve priorizar:
+- **Model**: Representação dos dados e lógica de mapeamento (JSON/Entities).
+- **View**: Telas (Pages) e componentes visuais (Widgets). Responsável pela interface e navegação.
+- **ViewModel**: Gerenciador de estado da tela. Responsável por validar inputs, processar lógica de negócio e comunicar-se com o Repository.
+- **Repository**: Camada de abstração de dados (Supabase, Local Storage, APIs externas).
 
-- simplicidade;
-- legibilidade;
-- organização;
-- manutenção;
-- escalabilidade;
-- compatibilidade com IA;
-- reutilização.
+> [!IMPORTANT]
+> O projeto prioriza simplicidade e não deve adicionar camadas, abstrações ou padrões arquiteturais (como Clean Architecture ou Use Cases) sem necessidade real para o escopo atual.
 
-Evitar qualquer forma de overengineering.
+## Gerenciamento de Estado
 
----
+Utilizamos o **Provider** para o gerenciamento de estado reativo.
+As ViewModels herdam de `ChangeNotifier` para notificar a View sobre alterações de estado.
 
-# Arquitetura
+## Modularização
 
-O projeto utiliza:
-
-- MVVM
-- Provider
-- Repository Pattern
-- Modularização por funcionalidade
-
-Não utilizar:
-
-- Clean Architecture
-- DDD
-- UseCases
-- Services desnecessários
-- Camadas extras sem necessidade
-
----
-
-# Estrutura do Projeto
+A organização é feita por **Feature (Funcionalidade)** dentro do diretório `lib/modules/`. Cada módulo deve seguir a estrutura:
 
 ```text
-lib/
-
-core/
-shared/
-
-modules/
-
-login/
-users/
-tasks/
-
-view/
-viewmodel/
-repositories/
-models/
-widgets/
+module_name/
+├── models/
+├── repositories/
+├── view/
+│   ├── pages/
+│   └── widgets/
+└── viewmodel/
 ```
 
-Cada módulo deve possuir sua própria estrutura.
+Recursos globais e compartilhados ficam em `lib/core/` ou `lib/shared/`.
 
----
+## Naming Conventions
 
-# Organização dos Arquivos
+- **Arquivos**: `snake_case.dart` (ex: `login_page.dart`).
+- **Classes**: `PascalCase` (ex: `AuthRepository`).
+- **Métodos e Variáveis**: `camelCase` (ex: `signInWithEmail()`).
+- **Variáveis Privadas**: Devem iniciar com underline (ex: `_isLoading`).
 
-A ordem dos elementos dentro de um arquivo deve seguir:
+## Nomenclatura Técnica (Exemplos)
 
-```text
-Imports
+- **ViewModels**: Deve terminar com `ViewModel` (ex: `SignupViewModel`).
+- **Repositories**: Deve terminar com `Repository` (ex: `AuthRepository`).
+- **Páginas**: Deve terminar com `Page` (ex: `LoginPage`).
 
-Constantes
+## Organização de Arquivos (Interno)
 
-Mocks (quando testes)
+1. Imports (Organizados por pacotes e relativos)
+2. Constantes/Enums
+3. Classe Principal
+    - Propriedades (Privadas primeiro)
+    - Construtor
+    - Métodos Públicos
+    - Métodos Privados/Helpers
 
-Helpers privados
+## Widgets Reutilizáveis
 
-main()
+Componentes que aparecem em múltiplas telas devem ser movidos para `lib/core/widgets/` ou `lib/shared/widgets/`.
+Exemplos existentes:
+- `PrimaryButton`
+- `AuthTextField`
+- `ErrorMessage`
 
-Groups
+## Uso de AppKeys
 
-Widgets privados
-```
+Todas as chaves para testes e automação devem ser centralizadas em `lib/core/constants/app_keys.dart`.
+**Nunca** declare strings de Key diretamente nos Widgets.
 
-Nunca misturar helpers após os testes.
+## Navegação
 
----
+A navegação deve utilizar as rotas nomeadas definidas em `lib/core/routes/route_names.dart` e gerenciadas em `lib/core/routes/app_routes.dart`.
 
-# Organização das Pastas
+## Tratamento de Erros e Validações
 
-Widgets reutilizáveis:
+- Validações de formulário devem ser centralizadas em utilitários de validação (ex: `LoginValidators`).
+- Mensagens de erro devem ser amigáveis e gerenciadas pela ViewModel, sendo exibidas na View via componentes padronizados.
 
-```text
-shared/widgets/
-```
+## Testes
 
-Widgets específicos de uma tela:
+- **Unitários**: Focados na lógica das ViewModels e Repositories.
+- **Widget Tests**: Focados na UI, garantindo que componentes renderizem corretamente e reajam a estados.
+- Utilizamos o pacote **Mocktail** para criação de mocks de dependências.
 
-```text
-modules/<feature>/view/widgets/
-```
+## Boas Práticas
 
-Nunca duplicar Widgets.
-
----
-
-# Organização das Keys
-
-Todas as Keys ficam em:
-
-```text
-lib/core/constants/app_keys.dart
-```
-
-Nunca criar Keys diretamente dentro do Widget.
-
-Formato obrigatório:
-
-```text
-<tela>_<componente>_<tipo>
-```
-
-Exemplos:
-
-```dart
-login_email_field
-
-login_password_field
-
-login_button
-
-login_google_button
-
-signup_name_field
-
-signup_button
-
-auth_logo
-
-auth_title
-
-auth_subtitle
-
-task_save_button
-```
-
----
-
-# Organização das Strings
-
-Sempre que uma String for reutilizada diversas vezes, transformá-la em constante.
-
-Exemplo:
-
-```text
-lib/core/constants/app_strings.dart
-```
-
-Evitar duplicação.
-
----
-
-# Organização das Cores
-
-```text
-app_colors.dart
-```
-
-Nunca utilizar cores diretamente nos Widgets.
-
----
-
-# Organização dos Assets
-
-```text
-app_assets.dart
-```
-
-Exemplo:
-
-```dart
-AppAssets.logo
-
-AppAssets.googleLogo
-```
-
-Nunca escrever caminhos manualmente.
-
----
-
-# Organização dos Espaçamentos
-
-```text
-app_sizes.dart
-```
-
-Exemplo:
-
-```dart
-AppSizes.small
-
-AppSizes.medium
-
-AppSizes.large
-```
-
-Evitar números mágicos.
-
----
-
-# Organização dos Ícones
-
-```text
-app_icons.dart
-```
-
----
-
-# Componentização
-
-Sempre reutilizar componentes.
-
-Exemplos:
-
-```text
-AuthHeader
-
-AuthTextField
-
-PasswordField
-
-PrimaryButton
-
-SocialLoginButton
-
-ErrorMessage
-```
-
-Evitar Widgets gigantes.
-
----
-
-# View
-
-Responsabilidades:
-
-- renderizar interface
-- consumir ViewModel
-- navegação
-- composição dos Widgets
-
-Nunca conter regras de negócio.
-
----
-
-# ViewModel
-
-Responsabilidades:
-
-- estado da tela
-- validações
-- mensagens
-- loading
-- chamadas ao Repository
-
-Nunca acessar:
-
-- BuildContext
-- Widgets
-- Navigator
-
----
-
-# Repository
-
-Responsável apenas por:
-
-- Supabase
-- APIs
-- Banco local
-- Secure Storage
-
-Nunca conter lógica visual.
-
----
-
-# Validações
-
-Toda validação deve ocorrer na ViewModel.
-
-A View apenas exibe o estado.
-
----
-
-# Nomenclatura
-
-Classes:
-
-```dart
-LoginViewModel
-
-AuthRepository
-
-PrimaryButton
-```
-
-Métodos:
-
-```dart
-signIn()
-
-signUp()
-
-validateForm()
-
-togglePasswordVisibility()
-```
-
-Variáveis privadas:
-
-```dart
-_email
-
-_password
-
-_isLoading
-```
-
----
-
-# Comentários
-
-Utilizar separadores padronizados.
-
-Exemplo:
-
-```dart
-//===========================================================================
-// Estrutura Inicial
-//===========================================================================
-```
-
-Evitar comentários óbvios.
-
----
-
-# Testes
-
-O projeto utiliza:
-
-- Unit Test
-- Widget Test
-
----
-
-# Organização dos Testes
-
-Sempre dividir por responsabilidade.
-
-Exemplo:
-
-```text
-Estado Inicial
-
-Estrutura Inicial
-
-Campos do Formulário
-
-Validação Visual
-
-Botão Principal
-
-Interações
-
-Fluxo
-
-Navegação
-
-Feedback
-
-Responsividade
-```
-
-Nunca criar grupos baseados apenas no nome do método.
-
----
-
-# Nome dos Testes
-
-Sempre utilizar:
-
-```text
-deve + ação + condição
-```
-
-Exemplos:
-
-```text
-deve exibir o botão Entrar
-
-deve habilitar o botão quando o formulário estiver válido
-
-deve navegar para Home após login
-
-deve exibir mensagem de erro quando o login falhar
-```
-
-Evitar:
-
-```text
-teste login
-
-teste botão
-
-teste campo
-
-login sucesso
-```
-
----
-
-# Helpers de Teste
-
-Helpers privados ficam antes do main.
-
-Exemplo:
-
-```dart
-_pumpLoginPage()
-
-_mockLoginSuccess()
-
-_mockLoginFailure()
-
-_verifyLoginCalled()
-```
-
----
-
-# Organização dos Mocks
-
-Todos os Mocks ficam antes do main.
-
-Exemplo:
-
-```dart
-MockAuthRepository
-
-MockLoginViewModel
-
-MockUserModel
-```
-
----
-
-# Organização dos Helpers
-
-Sempre utilizar pequenos Helpers reutilizáveis.
-
-Exemplo:
-
-```dart
-_pumpLoginPage()
-
-_pumpSignUpPage()
-
-_preencherFormulario()
-
-_mockSuccess()
-
-_mockFailure()
-
-_verifyCalled()
-```
-
-Evitar repetição.
-
----
-
-# Widget Tests
-
-Cada Widget reutilizável deve possuir seu próprio arquivo de testes.
-
-Exemplo:
-
-```text
-auth_header_test.dart
-
-primary_button_test.dart
-
-password_field_test.dart
-```
-
-A tela deve apenas verificar que o Widget está presente.
-
-Nunca repetir testes internos do Widget.
-
----
-
-# Responsabilidade dos Testes
-
-## Widget
-
-Validar:
-
-- renderização
-- interação
-- aparência
-- composição
-
----
-
-## ViewModel
-
-Validar:
-
-- regras de negócio
-- estados
-- loading
-- mensagens
-- chamadas ao Repository
-
----
-
-## Repository
-
-Validar:
-
-- integração
-- exceções
-- persistência
-- mapeamento de erros
-
----
-
-# Chaves de Teste (Keys)
-
-Sempre utilizar Keys para localizar Widgets importantes.
-
-Evitar utilizar textos quando possível.
-
-Exemplo:
-
-```dart
-find.byKey(AppKeys.loginButton)
-```
-
-Preferir Keys a:
-
-```dart
-find.text(...)
-```
-
----
-
-# Objetivo Final
-
-Todo código produzido deve ser:
-
-- simples;
-- previsível;
-- organizado;
-- reutilizável;
-- facilmente testável;
-- facilmente compreendido por humanos e Inteligência Artificial.
-
-Qualquer contribuição que não siga este documento deverá ser refatorada antes de ser integrada ao projeto.
+- **Don't Repeat Yourself (DRY)**: Reutilize widgets e lógica sempre que possível.
+- **Simplicidade**: Código legível é melhor do que código "esperto".
+- **Comentários**: Use apenas para explicar o "porquê" de decisões complexas, não o "quê".

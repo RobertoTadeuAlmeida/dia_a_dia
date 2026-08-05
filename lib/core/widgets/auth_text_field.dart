@@ -38,7 +38,9 @@ class AuthTextField extends StatelessWidget {
     this.isPassword = false,
     this.onTogglePasswordVisibility,
     Key? toggleKey,
-  }) : _fieldKey = key, _toggleKey = toggleKey, super(key: null);
+  }) : _fieldKey = key,
+       _toggleKey = toggleKey,
+       super(key: null);
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +51,9 @@ class AuthTextField extends StatelessWidget {
         Text(
           label,
           key: AppKeys.authTextFieldLabel,
+          style: const TextStyle(fontSize: 12),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 2),
         TestableTextFormField(
           key: _fieldKey ?? AppKeys.authTextField,
           controller: controller,
@@ -64,10 +67,7 @@ class AuthTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             prefixIcon: prefixIcon != null
-                ? Icon(
-                    prefixIcon,
-                    key: AppKeys.authTextFieldPrefixIcon,
-                  )
+                ? Icon(prefixIcon, key: AppKeys.authTextFieldPrefixIcon)
                 : null,
             suffixIcon: isPassword
                 ? IconButton(
@@ -78,8 +78,8 @@ class AuthTextField extends StatelessWidget {
                     ),
                   )
                 : (suffixIcon is IconData
-                    ? Icon(suffixIcon as IconData)
-                    : suffixIcon as Widget?),
+                      ? Icon(suffixIcon as IconData)
+                      : suffixIcon as Widget?),
             error: errorText != null
                 ? Text(
                     errorText!,

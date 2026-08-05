@@ -84,20 +84,13 @@ void _verifySignUpCalled({
   required Map<String, dynamic> data,
 }) {
   verify(
-    () => _mockGoTrue.signUp(
-      email: email,
-      password: password,
-      data: data,
-    ),
+    () => _mockGoTrue.signUp(email: email, password: password, data: data),
   ).called(1);
 }
 
 void _verifyTokenPersisted({String token = 'token_valido'}) {
   verify(
-    () => _mockSecureStorage.write(
-      key: 'auth_session',
-      value: token,
-    ),
+    () => _mockSecureStorage.write(key: 'auth_session', value: token),
   ).called(1);
 }
 
@@ -248,7 +241,6 @@ void main() {
 
         // Assert
         _verifyTokenPersisted(token: tToken);
-
       },
     );
 
@@ -436,7 +428,9 @@ void main() {
       'deve garantir a limpeza local mesmo se a chamada remota ao Supabase falhar',
       () async {
         // Arrange
-        when(() => _mockGoTrue.signOut()).thenThrow(Exception('Supabase indisponível'));
+        when(
+          () => _mockGoTrue.signOut(),
+        ).thenThrow(Exception('Supabase indisponível'));
         when(
           () => _mockSecureStorage.delete(key: any(named: 'key')),
         ).thenAnswer((_) async {});

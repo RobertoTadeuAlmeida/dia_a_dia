@@ -27,10 +27,11 @@ abstract final class AppKeys {
   static const signupLastNameField = Key('signup_last_name_field');
   static const signupEmailField = Key('signup_email_field');
   static const signupPasswordField = Key('signup_password_field');
-  static const signupConfirmPasswordField = Key('signup_confirm_password_field');
+  static const signupConfirmPasswordField = Key(
+    'signup_confirm_password_field',
+  );
   static const signupButton = Key('signup_button');
   static const signupBackButton = Key('signup_back_button');
-  static const signupLoginLink = Key('signup_login_link');
 
   //===========================================================================
   // HomePage
@@ -69,7 +70,9 @@ abstract final class AppKeys {
   static const authTextField = Key('auth_text_field');
   static const authTextFieldLabel = Key('auth_text_field_label');
   static const authTextFieldError = Key('auth_text_field_error');
-  static const authTextFieldPasswordToggle = Key('auth_text_field_password_toggle');
+  static const authTextFieldPasswordToggle = Key(
+    'auth_text_field_password_toggle',
+  );
   static const authTextFieldPrefixIcon = Key('auth_text_field_prefix_icon');
 
   //===========================================================================

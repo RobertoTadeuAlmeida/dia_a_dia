@@ -6,7 +6,8 @@ class AuthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final theme = Theme.of(context);
+    return Column(
       key: AppKeys.authHeader,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -14,9 +15,9 @@ class AuthHeader extends StatelessWidget {
         //===========================================================================
         // Logo
         //===========================================================================
-        FlutterLogo(size: 60, key: AppKeys.authLogo),
+        const FlutterLogo(size: 20, key: AppKeys.authLogo),
 
-        SizedBox(height: 8),
+        const SizedBox(height: 2),
 
         //===========================================================================
         // Título
@@ -24,10 +25,10 @@ class AuthHeader extends StatelessWidget {
         Text(
           'Dia A Dia',
           key: AppKeys.authTitle,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: theme.textTheme.headlineMedium,
         ),
 
-        SizedBox(height: 4),
+        const SizedBox(height: 2),
 
         //===========================================================================
         // Subtítulo
@@ -35,7 +36,9 @@ class AuthHeader extends StatelessWidget {
         Text(
           'Seu dia mais organizado',
           key: AppKeys.authSubtitle,
-          style: TextStyle(fontSize: 14),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+          ),
         ),
       ],
     );

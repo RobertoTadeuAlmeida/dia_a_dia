@@ -4,11 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<void> _pumpAuthHeader(WidgetTester tester) async {
   await tester.pumpWidget(
-    const MaterialApp(
-      home: Scaffold(
-        body: AuthHeader(),
-      ),
-    ),
+    const MaterialApp(home: Scaffold(body: AuthHeader())),
   );
 }
 
@@ -18,32 +14,23 @@ void main() {
   //===========================================================================
 
   group('Estrutura Inicial', () {
-    testWidgets(
-      'deve exibir a logo do aplicativo',
-          (tester) async {
-        await _pumpAuthHeader(tester);
+    testWidgets('deve exibir a logo do aplicativo', (tester) async {
+      await _pumpAuthHeader(tester);
 
-        expect(find.byKey(const Key('auth_logo')), findsOneWidget);
-      },
-    );
+      expect(find.byKey(const Key('auth_logo')), findsOneWidget);
+    });
 
-    testWidgets(
-      'deve exibir o título do aplicativo',
-          (tester) async {
-        await _pumpAuthHeader(tester);
+    testWidgets('deve exibir o título do aplicativo', (tester) async {
+      await _pumpAuthHeader(tester);
 
-        expect(find.text('Dia A Dia'), findsOneWidget);
-      },
-    );
+      expect(find.text('Dia A Dia'), findsOneWidget);
+    });
 
-    testWidgets(
-      'deve exibir o subtítulo do aplicativo',
-          (tester) async {
-        await _pumpAuthHeader(tester);
+    testWidgets('deve exibir o subtítulo do aplicativo', (tester) async {
+      await _pumpAuthHeader(tester);
 
-        expect(find.text('Seu dia mais organizado'), findsOneWidget);
-      },
-    );
+      expect(find.text('Seu dia mais organizado'), findsOneWidget);
+    });
   });
 
   //===========================================================================
@@ -51,25 +38,19 @@ void main() {
   //===========================================================================
 
   group('Layout', () {
-    testWidgets(
-      'deve organizar os elementos em uma Column',
-          (tester) async {
-        await _pumpAuthHeader(tester);
+    testWidgets('deve organizar os elementos em uma Column', (tester) async {
+      await _pumpAuthHeader(tester);
 
-        expect(find.byType(Column), findsOneWidget);
-      },
-    );
+      expect(find.byType(Column), findsOneWidget);
+    });
 
-    testWidgets(
-      'deve centralizar o conteúdo',
-          (tester) async {
-        await _pumpAuthHeader(tester);
+    testWidgets('deve centralizar o conteúdo', (tester) async {
+      await _pumpAuthHeader(tester);
 
-        final column = tester.widget<Column>(find.byType(Column));
+      final column = tester.widget<Column>(find.byType(Column));
 
-        expect(column.crossAxisAlignment, CrossAxisAlignment.center);
-      },
-    );
+      expect(column.crossAxisAlignment, CrossAxisAlignment.center);
+    });
   });
 
   //===========================================================================
@@ -77,22 +58,16 @@ void main() {
   //===========================================================================
 
   group('Renderização', () {
-    testWidgets(
-      'deve renderizar sem lançar exceções',
-          (tester) async {
-        await _pumpAuthHeader(tester);
+    testWidgets('deve renderizar sem lançar exceções', (tester) async {
+      await _pumpAuthHeader(tester);
 
-        expect(tester.takeException(), isNull);
-      },
-    );
+      expect(tester.takeException(), isNull);
+    });
 
-    testWidgets(
-      'deve ocupar apenas o espaço necessário',
-          (tester) async {
-        await _pumpAuthHeader(tester);
+    testWidgets('deve ocupar apenas o espaço necessário', (tester) async {
+      await _pumpAuthHeader(tester);
 
-        expect(find.byType(AuthHeader), findsOneWidget);
-      },
-    );
+      expect(find.byType(AuthHeader), findsOneWidget);
+    });
   });
 }

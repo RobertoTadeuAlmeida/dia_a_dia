@@ -39,6 +39,8 @@ void _mockErrorState(String message) {
 }
 
 void _mockSuccessState(String message) {
+  when(() => _viewModel.isFormValid).thenReturn(true);
+  when(() => _viewModel.isButtonEnabled).thenReturn(true);
   when(() => _viewModel.isLoading).thenReturn(false);
   when(() => _viewModel.sucessMessage).thenReturn(message);
 }
@@ -107,12 +109,6 @@ void main() {
       await _pumpSignUpPage(tester);
 
       expect(find.byKey(AppKeys.socialLoginButton), findsOneWidget);
-    });
-
-    testWidgets('deve exibir o link Fazer Login', (tester) async {
-      await _pumpSignUpPage(tester);
-
-      expect(find.byKey(AppKeys.signupLoginLink), findsOneWidget);
     });
   });
 
@@ -382,17 +378,6 @@ void main() {
       expect(find.byKey(AppKeys.loginPage), findsOneWidget);
     });
 
-    testWidgets('deve navegar para Login ao tocar em Fazer Login', (
-      tester,
-    ) async {
-      await _pumpSignUpPage(tester);
-
-      await tester.tap(find.byKey(AppKeys.signupLoginLink));
-      await tester.pump();
-
-      expect(find.byKey(AppKeys.loginPage), findsOneWidget);
-    });
-
     testWidgets('deve navegar para Home após cadastro concluído', (
       tester,
     ) async {
@@ -433,6 +418,21 @@ void main() {
 
       expect(find.byType(SingleChildScrollView), findsOneWidget);
     });
+  });
+  testWidgets('deve exibir Nome e Sobrenome lado a lado', (tester) async {
+    await _pumpSignUpPage(tester);
+
+    final nameField = find.byKey(AppKeys.signupNameField);
+    final lastNameField = find.byKey(AppKeys.signupLastNameField);
+
+    expect(nameField, findsOneWidget);
+    expect(lastNameField, findsOneWidget);
+
+    final nameRect = tester.getRect(nameField);
+    final lastNameRect = tester.getRect(lastNameField);
+
+    expect(nameRect.top, closeTo(lastNameRect.top, 1));
+    expect(nameRect.right, lessThanOrEqualTo(lastNameRect.left));
   });
 
   //---------------------------------------------------------------------------

@@ -4,21 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> _pumpAuthTextField(
-    WidgetTester tester, {
-      TextEditingController? controller,
-      String label = 'E-mail',
-      String hintText = 'Digite seu e-mail',
-      IconData? prefixIcon,
-      IconData? suffixIcon,
-      String? errorText,
-      bool obscureText = false,
-      bool enabled = true,
-      bool isPassword = false,
-      TextInputType keyboardType = TextInputType.text,
-      VoidCallback? onTap,
-      ValueChanged<String>? onChanged,
-      VoidCallback? onTogglePasswordVisibility,
-    }) async {
+  WidgetTester tester, {
+  TextEditingController? controller,
+  String label = 'E-mail',
+  String hintText = 'Digite seu e-mail',
+  IconData? prefixIcon,
+  IconData? suffixIcon,
+  String? errorText,
+  bool obscureText = false,
+  bool enabled = true,
+  bool isPassword = false,
+  TextInputType keyboardType = TextInputType.text,
+  VoidCallback? onTap,
+  ValueChanged<String>? onChanged,
+  VoidCallback? onTogglePasswordVisibility,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -61,21 +61,16 @@ void main() {
       expect(find.text('Digite seu e-mail'), findsOneWidget);
     });
 
-    testWidgets('deve exibir o ícone inicial quando informado', (
-        tester,
-        ) async {
-      await _pumpAuthTextField(
-        tester,
-        prefixIcon: Icons.email_outlined,
-      );
+    testWidgets('deve exibir o ícone inicial quando informado', (tester) async {
+      await _pumpAuthTextField(tester, prefixIcon: Icons.email_outlined);
 
       expect(find.byKey(AppKeys.authTextFieldPrefixIcon), findsOneWidget);
       expect(find.byIcon(Icons.email_outlined), findsOneWidget);
     });
 
     testWidgets('não deve exibir ícone inicial quando não informado', (
-        tester,
-        ) async {
+      tester,
+    ) async {
       await _pumpAuthTextField(tester);
 
       expect(find.byKey(AppKeys.authTextFieldPrefixIcon), findsNothing);
@@ -84,7 +79,7 @@ void main() {
     testWidgets('deve exibir o campo de texto', (tester) async {
       await _pumpAuthTextField(tester);
 
-      expect(find.byType(TextFormField), findsOneWidget);
+      expect(find.byWidgetPredicate((w) => w is TextFormField), findsOneWidget);
       expect(find.byKey(AppKeys.authTextField), findsOneWidget);
     });
   });
@@ -97,9 +92,7 @@ void main() {
     testWidgets('deve exibir o valor inicial informado', (tester) async {
       await _pumpAuthTextField(
         tester,
-        controller: TextEditingController(
-          text: 'teste@email.com',
-        ),
+        controller: TextEditingController(text: 'teste@email.com'),
       );
 
       expect(find.text('teste@email.com'), findsOneWidget);
@@ -108,10 +101,7 @@ void main() {
     testWidgets('deve atualizar o texto digitado', (tester) async {
       final controller = TextEditingController();
 
-      await _pumpAuthTextField(
-        tester,
-        controller: controller,
-      );
+      await _pumpAuthTextField(tester, controller: controller);
 
       await tester.enterText(
         find.byKey(AppKeys.authTextField),
@@ -121,15 +111,10 @@ void main() {
       expect(controller.text, 'novo@email.com');
     });
 
-    testWidgets('deve chamar onChanged ao alterar o texto', (
-        tester,
-        ) async {
+    testWidgets('deve chamar onChanged ao alterar o texto', (tester) async {
       String? value;
 
-      await _pumpAuthTextField(
-        tester,
-        onChanged: (text) => value = text,
-      );
+      await _pumpAuthTextField(tester, onChanged: (text) => value = text);
 
       await tester.enterText(
         find.byKey(AppKeys.authTextField),
@@ -145,41 +130,26 @@ void main() {
   //===========================================================================
 
   group('Campo de Senha', () {
+    testWidgets('deve exibir botão para mostrar ou ocultar senha', (
+      tester,
+    ) async {
+      await _pumpAuthTextField(tester, isPassword: true);
 
-
-    testWidgets(
-      'deve exibir botão para mostrar ou ocultar senha',
-          (tester) async {
-        await _pumpAuthTextField(
-          tester,
-          isPassword: true,
-        );
-
-        expect(
-          find.byKey(AppKeys.authTextFieldPasswordToggle),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(find.byKey(AppKeys.authTextFieldPasswordToggle), findsOneWidget);
+    });
 
     testWidgets(
       'não deve exibir botão de senha quando não for campo de senha',
-          (tester) async {
-        await _pumpAuthTextField(
-          tester,
-          isPassword: false,
-        );
+      (tester) async {
+        await _pumpAuthTextField(tester, isPassword: false);
 
-        expect(
-          find.byKey(AppKeys.authTextFieldPasswordToggle),
-          findsNothing,
-        );
+        expect(find.byKey(AppKeys.authTextFieldPasswordToggle), findsNothing);
       },
     );
 
     testWidgets(
       'deve chamar onTogglePasswordVisibility ao pressionar o botão',
-          (tester) async {
+      (tester) async {
         var called = false;
 
         await _pumpAuthTextField(
@@ -190,9 +160,7 @@ void main() {
           },
         );
 
-        await tester.tap(
-          find.byKey(AppKeys.authTextFieldPasswordToggle),
-        );
+        await tester.tap(find.byKey(AppKeys.authTextFieldPasswordToggle));
 
         await tester.pump();
 
@@ -206,9 +174,7 @@ void main() {
   //===========================================================================
 
   group('Estados', () {
-    testWidgets('deve permanecer habilitado por padrão', (
-        tester,
-        ) async {
+    testWidgets('deve permanecer habilitado por padrão', (tester) async {
       await _pumpAuthTextField(tester);
 
       final field = tester.widget<TextFormField>(
@@ -219,12 +185,9 @@ void main() {
     });
 
     testWidgets('deve permanecer desabilitado quando enabled for falso', (
-        tester,
-        ) async {
-      await _pumpAuthTextField(
-        tester,
-        enabled: false,
-      );
+      tester,
+    ) async {
+      await _pumpAuthTextField(tester, enabled: false);
 
       final field = tester.widget<TextFormField>(
         find.byKey(AppKeys.authTextField),
@@ -234,20 +197,13 @@ void main() {
     });
 
     testWidgets('não deve permitir edição quando estiver desabilitado', (
-        tester,
-        ) async {
+      tester,
+    ) async {
       final controller = TextEditingController();
 
-      await _pumpAuthTextField(
-        tester,
-        enabled: false,
-        controller: controller,
-      );
+      await _pumpAuthTextField(tester, enabled: false, controller: controller);
 
-      await tester.enterText(
-        find.byKey(AppKeys.authTextField),
-        'teste',
-      );
+      await tester.enterText(find.byKey(AppKeys.authTextField), 'teste');
 
       expect(controller.text, isEmpty);
     });
@@ -258,32 +214,21 @@ void main() {
   //===========================================================================
 
   group('Mensagens de Erro', () {
-    testWidgets(
-      'deve exibir mensagem de erro quando errorText for informado',
-          (tester) async {
-        await _pumpAuthTextField(
-          tester,
-          errorText: 'Campo obrigatório',
-        );
+    testWidgets('deve exibir mensagem de erro quando errorText for informado', (
+      tester,
+    ) async {
+      await _pumpAuthTextField(tester, errorText: 'Campo obrigatório');
 
-        expect(find.text('Campo obrigatório'), findsOneWidget);
-        expect(
-          find.byKey(AppKeys.authTextFieldError),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(find.text('Campo obrigatório'), findsOneWidget);
+      expect(find.byKey(AppKeys.authTextFieldError), findsOneWidget);
+    });
 
-    testWidgets(
-      'não deve exibir mensagem de erro quando errorText for nulo',
-          (tester) async {
-        await _pumpAuthTextField(tester);
+    testWidgets('não deve exibir mensagem de erro quando errorText for nulo', (
+      tester,
+    ) async {
+      await _pumpAuthTextField(tester);
 
-        expect(
-          find.byKey(AppKeys.authTextFieldError),
-          findsNothing,
-        );
-      },
-    );
+      expect(find.byKey(AppKeys.authTextFieldError), findsNothing);
+    });
   });
 }

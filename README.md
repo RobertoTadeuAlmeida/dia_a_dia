@@ -1,104 +1,124 @@
 # Dia A Dia — Seu dia mais organizado 🚀
 
-![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
-
-O **Dia A Dia** é um organizador de rotina inteligente desenvolvido em Flutter, projetado para ajudar usuários a gerenciarem suas tarefas e compromissos com um diferencial estratégico: a integração com dados climáticos para evitar imprevistos no planejamento diário.
-
----
-
-## 🎯 Objetivos do Projeto
-
-- **Organização Eficiente**: Planejamento de rotinas e tarefas de forma intuitiva.
-- **Previsibilidade**: Integração com clima para sugerir os melhores horários para atividades externas.
-- **Foco em Produtividade**: Otimização do tempo para estudantes, autônomos e profissionais.
-- **Segurança**: Autenticação moderna e armazenamento seguro de dados.
-
-## ✨ Funcionalidades Atuais (MVP V1)
-
-- [x] **Autenticação Segura**: Login com E-mail/Senha e Social Login (Google) via Supabase.
-- [x] **Gestão de Sessão**: Persistência de login e restauração automática utilizando Armazenamento Seguro.
-- [x] **Interface Moderna**: UI baseada em Material Design 3, focada em simplicidade e usabilidade.
-- [x] **Arquitetura Robusta**: Implementação seguindo rigorosamente os padrões de TDD (Test-Driven Development).
-- [x] **Componentização**: Widgets reutilizáveis e padronizados para consistência visual.
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
+  <img src="https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white" alt="Dart" />
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License" />
+</p>
 
 ---
 
-## 🛠 Tecnologias Utilizadas
+## 📱 Sobre o projeto
 
-### Frontend
-- **Framework**: [Flutter](https://flutter.dev/)
-- **Gerenciamento de Estado**: [Provider](https://pub.dev/packages/provider)
-- **Design System**: Material Design 3
+O **Dia A Dia** é um organizador de rotina inteligente projetado para transformar a maneira como você gerencia seu tempo. Através de uma interface intuitiva e moderna, o aplicativo permite que você planeje suas tarefas diárias com um diferencial estratégico: a integração com dados meteorológicos, ajudando a evitar imprevistos e otimizando atividades ao ar livre ou compromissos externos.
 
-### Backend & Serviços
-- **Backend-as-a-Service**: [Supabase](https://supabase.com/) (Auth, Database, Storage)
-- **API de Clima**: OpenWeather API
-- **Persistência Local**: Flutter Secure Storage
+A proposta é oferecer clareza, previsibilidade e produtividade para estudantes, profissionais e qualquer pessoa que busque uma rotina mais estruturada.
 
 ---
 
-## 🏗 Arquitetura e Padrões
+## ✨ Funcionalidades
 
-O projeto segue padrões rigorosos de desenvolvimento para garantir escalabilidade e manutenção:
+### Autenticação e Segurança
+- [x] **Login Seguro**: Autenticação via E-mail e Senha integrados ao Supabase.
+- [x] **Gestão de Cadastro**: Criação de novos usuários com validação de dados em tempo real.
+- [x] **Persistência de Sessão**: Restauração automática de login utilizando armazenamento seguro no dispositivo.
+- [ ] **Login Social**: Autenticação via Google (Em desenvolvimento).
 
-- **MVVM (Model-View-ViewModel)**: Separação clara entre lógica de negócio, estado da interface e visualização.
-- **Repository Pattern**: Abstração da fonte de dados para facilitar testes e troca de provedores.
-- **Modularização**: Organização por funcionalidade para evitar acoplamento excessivo.
-- **TDD (Test-Driven Development)**: Garantia de qualidade com suítes de testes unitários e de widget cobrindo os fluxos principais.
-
-> [!NOTE]
-> Consulte o documento de [Coding Standards](docs/coding_standards.md) para detalhes sobre as diretrizes de desenvolvimento.
+### Organização (Roadmap)
+- [ ] **Dashboard Principal**: Visualização rápida do dia e progresso das tarefas (Interface em andamento).
+- [ ] **Gerenciamento de Tarefas**: Criação, edição e categorização de atividades.
+- [ ] **Integração climática**: consulta à previsão do tempo.
 
 ---
 
-## 🧪 Estratégia de Testes
+## 🛠️ Tecnologias
 
-A qualidade do código é validada através de uma cobertura extensiva:
+O projeto utiliza uma stack focada em simplicidade e manutenibilidade:
 
-- **Widget Tests**: Validação de renderização, interação e comportamento visual dos componentes.
-- **Unit Tests**: Testes de lógica de negócio em ViewModels e Repositories.
-- **Mocking**: Utilização de `mocktail` para simular dependências externas com previsibilidade.
+| Tecnologia | Utilização |
+|---|---|
+| **Flutter** | Framework para desenvolvimento do aplicativo |
+| **Dart** | Linguagem de programação principal |
+| **Supabase Auth** | Serviço de autenticação e gestão de usuários |
+| **Provider** | Gerenciamento de estado reativo |
+| **Flutter Secure Storage** | Armazenamento seguro de tokens de sessão |
+| **Google Fonts** | Integração da família tipográfica **Manrope** |
+| **Mocktail** | Biblioteca para mocking em testes automatizados |
 
-Para rodar os testes:
+---
+
+## 🚧 Status
+
+O projeto encontra-se atualmente em fase de **MVP (Minimum Viable Product)**. As funcionalidades de autenticação e as bases de identidade visual estão em desenvolvimento/consolidação, com o desenvolvimento focado agora nas funcionalidades core de gerenciamento de tarefas.
+
+---
+
+## 📚 Documentação
+
+Nossa documentação é organizada para facilitar tanto o entendimento do produto quanto a manutenção técnica.
+
+### 🎨 Design e Identidade
+- [Paleta de Cores](docs/designer/ui/paleta_cores.md)
+- [Tipografia](docs/designer/brand/tipografia.md)
+- [Logo e Branding](docs/designer/ui/logo.md)
+
+### ⚙️ Desenvolvimento
+- [Padrões de Código (Coding Standards)](docs/coding_standards.md)
+
+### 🚀 Funcionalidades (Features)
+- **Auth (FN0001)**: [Especificação Funcional](docs/features/auth/FN0001_autenticar_usuario.md) | [UX/UI](docs/features/auth/ux-ui.md)
+- **Signup (FN0002)**: [Especificação Funcional](docs/features/signup/FN0002_gerenciar_usuario.md) | [UX/UI](docs/features/signup/ux-ui.md)
+
+---
+
+## 🏗️ Estrutura do Projeto
+
+```text
+lib/
+├── core/             # Componentes, constantes, temas e utilitários globais
+├── modules/          # Funcionalidades divididas por módulos (features)
+│   ├── login/        # Lógica e UI de Autenticação e Cadastro
+│   ├── home/         # Dashboard e telas principais
+│   ├── task/         # Gerenciamento de tarefas
+│   └── weather/      # Integração com API de clima
+└── shared/           # Widgets e modelos compartilhados entre módulos
+```
+
+---
+
+## 🚀 Como executar
+
+1.  **Pré-requisitos**: Ter o Flutter SDK instalado e configurado em sua máquina.
+2.  **Clonar e Instalar**:
+    ```bash
+    git clone https://github.com/RobertoTadeuAlmeida/dia_a_dia.git
+    cd dia_a_dia
+    flutter pub get
+    ```
+3.  **Configuração**: O projeto depende de chaves do Supabase. Verifique os arquivos em `lib/core/config/` para as definições necessárias.
+4.  **Executar**:
+    ```bash
+    flutter run
+    ```
+
+---
+
+## 🧪 Testes
+
+A qualidade do código é garantida através de suítes de testes unitários e de widget.
+
+Para executar todos os testes:
 ```bash
 flutter test
 ```
 
 ---
 
-## 🚀 Como Rodar o Projeto
+## 📄 Licença
 
-1. **Pré-requisitos**:
-   - Flutter SDK (versão estável mais recente)
-   - Chaves de acesso ao Supabase e OpenWeather
-
-2. **Instalação**:
-   ```bash
-   git clone https://github.com/seu-usuario/dia_a_dia.git
-   cd dia_a_dia
-   flutter pub get
-   ```
-
-3. **Configuração**:
-   - Configure as variáveis de ambiente necessárias para o Supabase.
-
-4. **Execução**:
-   ```bash
-   flutter run
-   ```
+Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
-## 📅 Roadmap (Funcionalidades Futuras)
-
-- [ ] Sincronização em tempo real entre dispositivos.
-- [ ] Sugestão de horários inteligente via IA.
-- [ ] Integração com Google Agenda.
-- [ ] Widgets de tela inicial para visualização rápida.
-- [ ] Sistema de metas e estatísticas de produtividade.
-
----
-
-© 2026 Dia A Dia. Todos os direitos reservados.
+Developed by **Roberto Tadeu**

@@ -10,7 +10,8 @@ class SocialLoginButton extends StatelessWidget {
     Key? key,
     required this.onPressed,
     this.isLoading = false,
-  }) : _btnKey = key, super(key: null);
+  }) : _btnKey = key,
+       super(key: null);
 
   @override
   Widget build(BuildContext context) {
